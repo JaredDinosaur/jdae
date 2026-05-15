@@ -1,5 +1,5 @@
 #!/bin/bash
-yay -S --needed archiso squashfs-tools xorriso
+sudo pacman -S --needed archiso squashfs-tools xorriso
 mkdir -p archiso
 cd archiso
 cp -r /usr/share/archiso/configs/releng jdae
@@ -33,3 +33,5 @@ ln -s /usr/lib/systemd/system/NetworkManager.service airootfs/etc/systemd/system
 cd ..
 sudo rm -rf work out
 sudo mkarchiso -v jdae
+echo ""
+echo "Done."
