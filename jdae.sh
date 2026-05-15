@@ -638,7 +638,6 @@ echo "#!/bin/bash" > jdai-efi-2.sh
 echo "#!/bin/bash" > jdai-usr.sh
 chmod +x jdai-efi-2.sh
 chmod +x jdai-usr.sh
-chmod +x cleanup.sh
 
 # Set timezone (GB only)
 if [[ $reg == "GB" ]]; then
@@ -1004,7 +1003,12 @@ while [[ $loop == 1 ]]; do
             loop=0
             ;;
         3)
-            ./cleanup.sh
+            set +e
+            umount /mnt/boot
+            umount /mnt
+            swapoff -a
+            cryptsetup close /dev/mapper/root
+            set -e
             clear
             loop=0
             ;;
