@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 sudo pacman -S --needed archiso squashfs-tools xorriso
 mkdir -p archiso
 cd archiso
@@ -30,8 +31,8 @@ echo "WantedBy=multi-user.target" >> airootfs/etc/systemd/system/jdae.service
 mkdir -p airootfs/etc/systemd/system/multi-user.target.wants
 ln -s /etc/systemd/system/jdae.service airootfs/etc/systemd/system/multi-user.target.wants/myscript.service
 ln -s /usr/lib/systemd/system/NetworkManager.service airootfs/etc/systemd/system/multi-user.target.wants/NetworkManager.service
-cd ..
 sudo rm -rf work out
+cd ..
 sudo mkarchiso -v jdae
 echo ""
 echo "Done."
