@@ -15,7 +15,7 @@ echo "usbutils" >> packages.x86_64
 echo "pciutils" >> packages.x86_64
 echo "hwinfo" >> packages.x86_64
 mkdir -p airootfs/usr/local/bin
-cp jdae.sh airootfs/usr/local/bin
+cp ../jdae.sh airootfs/usr/local/bin
 chmod +x airootfs/usr/local/bin/jdae.sh
 mkdir -p airootfs/etc/systemd/system
 echo "[Unit]" >> airootfs/etc/systemd/system/jdae.service
