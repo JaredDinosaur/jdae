@@ -15,7 +15,7 @@ echo "usbutils" >> packages.x86_64
 echo "pciutils" >> packages.x86_64
 echo "hwinfo" >> packages.x86_64
 install -Dm755 ../../jdae.sh airootfs/usr/local/bin/jdae.sh
-cat > airootfs/root/.automated_script << 'EOF'
+cat > airootfs/root/.zlogin << 'EOF'
 /bin/bash /usr/bin/jdae.sh
 EOF
 sudo rm -rf work out
