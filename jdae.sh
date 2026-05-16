@@ -44,13 +44,14 @@ diskpart(){
         echo
         echo -e '\e[36m'"[Y]" '\e(B\e[m'"I understand, continue"
         echo -e '\e[36m'"[N]" '\e(B\e[m'"Choose another disk"
-        echo -e '\e[36m'"[Q]" '\e(B\e[m'"Cancel the installation"
+        echo -e '\e[36m'"[Q]" '\e(B\e[m'"Cancel the installation (power off)"
         read -n 1 choice
         case $choice in
             y|Y)
                 loop=0
                 ;;
             q|Q)
+                poweroff
                 exit 1
                 ;;
             *)
@@ -504,7 +505,7 @@ done
 sed -i "s/#Color/Color/" /etc/pacman.conf
 sed -i "s/ParallelDownloads = 5/ParallelDownloads = 1/" /etc/pacman.conf
 sed -i "s/#NoProgressBar/ILoveCandy/" /etc/pacman.conf
-pacman -Sy --noconfirm --needed hwinfo
+pacman -Syy
 
 # Get options
 setlocale
@@ -594,7 +595,8 @@ while [[ $menu == 1 ]]; do
     echo "-------------------------------------"
     echo
     echo -e '\e[36m'"[Y]" '\e(B\e[m'"Begin installation"
-    echo -e '\e[36m'"[N]" '\e(B\e[m'"Cancel installation"
+    echo -e '\e[36m'"[N]" '\e(B\e[m'"Cancel installation (power off)"
+    echo -e '\e[36m'"[Q]" '\e(B\e[m'"Exit to shell"
     echo
     echo -e '\e[36m'"[1]" '\e(B\e[m'"Change locale"
     echo -e '\e[36m'"[2]" '\e(B\e[m'"Change partitioning and encryption"
@@ -608,6 +610,9 @@ while [[ $menu == 1 ]]; do
             menu=0
             ;;
         n|N)
+            poweroff
+            ;;
+        q|Q)
             exit 1
             ;;
         1)

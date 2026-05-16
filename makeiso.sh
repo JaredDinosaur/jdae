@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 sudo pacman -S --needed archiso squashfs-tools xorriso
+sudo rm -rf archiso
 mkdir -p archiso
 cd archiso
 cp -r /usr/share/archiso/configs/releng jdae
@@ -16,7 +17,21 @@ echo "pciutils" >> packages.x86_64
 echo "hwinfo" >> packages.x86_64
 install -Dm755 ../../jdae.sh airootfs/usr/local/bin/jdae.sh
 cat > airootfs/root/.zlogin << 'EOF'
-/bin/bash /usr/bin/jdae.sh
+if [[ $(tty) == "/dev/tty1" ]]; then
+    /bin/bash /usr/local/bin/jdae.sh
+    echo ""
+    echo ""
+    echo ""
+    echo "The installer has exited."
+    echo "To start another installation, run the following commands (unless you chose cleanup and exit):"
+    echo "umount /mnt/boot"
+    echo "umount /mnt"
+    echo "swapoff -a"
+    echo "cryptsetup close /dev/mapper/root"
+    echo ""
+    echo "Then press Ctrl+D to reopen the installer."
+    echo ""
+fi
 EOF
 sudo rm -rf work out
 cd ..
