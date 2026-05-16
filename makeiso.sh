@@ -24,7 +24,7 @@ echo "After=multi-user.target" >> airootfs/etc/systemd/system/jdae.service
 echo "" >> airootfs/etc/systemd/system/jdae.service
 echo "[Service]" >> airootfs/etc/systemd/system/jdae.service
 echo "Type=simple" >> airootfs/etc/systemd/system/jdae.service
-echo "ExecStart=/usr/local/bin/jdae.sh" >> airootfs/etc/systemd/system/jdae.service
+echo "ExecStart=/bin/bash /usr/local/bin/jdae.sh" >> airootfs/etc/systemd/system/jdae.service
 echo "" >> airootfs/etc/systemd/system/jdae.service
 echo "[Install]" >> airootfs/etc/systemd/system/jdae.service
 echo "WantedBy=multi-user.target" >> airootfs/etc/systemd/system/jdae.service
