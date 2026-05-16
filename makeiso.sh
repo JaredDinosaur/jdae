@@ -29,7 +29,7 @@ echo "" >> airootfs/etc/systemd/system/jdae.service
 echo "[Install]" >> airootfs/etc/systemd/system/jdae.service
 echo "WantedBy=multi-user.target" >> airootfs/etc/systemd/system/jdae.service
 mkdir -p airootfs/etc/systemd/system/multi-user.target.wants
-ln -s /etc/systemd/system/jdae.service airootfs/etc/systemd/system/multi-user.target.wants/myscript.service
+ln -s /etc/systemd/system/jdae.service airootfs/etc/systemd/system/multi-user.target.wants/jdae.service
 ln -s /usr/lib/systemd/system/NetworkManager.service airootfs/etc/systemd/system/multi-user.target.wants/NetworkManager.service
 sudo rm -rf work out
 cd ..
