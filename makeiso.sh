@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 sudo pacman -S --needed archiso squashfs-tools xorriso
+mkdir -p archiso
 sudo rm -rf archiso
 mkdir -p archiso
 cd archiso
