@@ -91,6 +91,8 @@ diskpart(){
         echo -e '\e[36m'"[1]" '\e(B\e[m'"ext4" '\e[35m'"(default)"
         echo -e '\e[36m'"[2]" '\e(B\e[m'"btrfs"
         echo -e '\e[36m'"[3]" '\e(B\e[m'"xfs"
+        echo
+        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
         read -n 1 choice
         case $choice in
             1)
@@ -105,6 +107,22 @@ diskpart(){
                 rootfs="xfs"
                 loop=0
                 ;;
+            h|H)
+                clear
+                echo -e '\e[3m'"Help page: Filesystems"
+                echo
+                echo -e '\e[35m'"ext4"'\e(B\e[m'":"
+                echo "The default option. Balances performance and simplicity."
+                echo
+                echo -e '\e[35m'"btrfs"'\e(B\e[m'":"
+                echo "Has copy-on-write functionality to easily make backups. Good for data integrity, but may run slightly slower."
+                echo
+                echo -e '\e[35m'"xfs"'\e(B\e[m'":"
+                echo "High performance filesystem. Good for servers and large drives."
+                echo
+                echo -e '\e[3m'"Press any key to continue..."
+                read -n 1
+                ;;
             *)
                 ;;
         esac
@@ -116,6 +134,8 @@ diskpart(){
         echo
         echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
         echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
+        echo
+        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
         read -n 1 choice
         case $choice in
             y|Y)
@@ -149,6 +169,16 @@ diskpart(){
                 crypt=0
                 loop=0
                 ;;
+            h|H)
+                clear
+                echo -e '\e[3m'"Help page: Disk Encryption"
+                echo
+                echo "This will ask you for an encryption password every time you start your machine. Files on your main partition will be inaccessible without the key, making your system more secure."
+                echo "This may cause issues with some boot animations, and your main partition cannot be unlocked if you forget the key."
+                echo
+                echo -e '\e[3m'"Press any key to continue..."
+                read -n 1
+                ;;
             *)
                 ;;
         esac
@@ -167,6 +197,8 @@ pkgs(){
         echo -e '\e[36m'"[4]" '\e(B\e[m'"Desktop with LXQt"
         echo -e '\e[36m'"[5]" '\e(B\e[m'"Command line"
         echo -e '\e[36m'"[6]" '\e(B\e[m'"Minimal"
+        echo
+        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
         read -n 1 choice
         case $choice in
             1)
@@ -199,6 +231,37 @@ pkgs(){
                 profile="Minimal"
                 loop=0
                 ;;
+            h|H)
+                clear
+                echo -e '\e[3m'"Help page: Package Sets and Desktop Environments"
+                echo
+                echo -e '\e[35m'"Desktop (Plasma)"'\e(B\e[m'":"
+                echo "An easy-to-use Windows-like desktop which is highly customisable and stable."
+                echo "This is the best option for beginners, although it may run slower on old systems."
+                echo
+                echo -e '\e[35m'"Desktop (Hyprland)"'\e(B\e[m'":"
+                echo "An extremely lightweight and configurable tiling window manager."
+                echo "It is very complicated and may be unstable, especially on virtual machines."
+                echo
+                echo -e '\e[35m'"Desktop (Xfce)"'\e(B\e[m'":"
+                echo "A somewhat Mac-like desktop which is fast and customisable."
+                echo "It is slightly more complicated than Plama."
+                echo
+                echo -e '\e[35m'"Desktop (LXQt)"'\e(B\e[m'":"
+                echo "A more advanced but very lightweight Windows-like desktop."
+                echo "Ideal for low-end machines."
+                echo
+                echo -e '\e[35m'"Command line"'\e(B\e[m'":"
+                echo "A simple text interface with some basic utilities."
+                echo "This option is ideal if you wish to install a different desktop environment."
+                echo
+                echo -e '\e[35m'"Minimal"'\e(B\e[m'":"
+                echo "The most basic set of packages with no extras."
+                echo "This is recommended for servers or extremely slow machines."
+                echo
+                echo -e '\e[3m'"Press any key to continue..."
+                read -n 1
+                ;;
             *)
                 ;;
         esac
@@ -211,6 +274,8 @@ pkgs(){
         echo
         echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
         echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
+        echo
+        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
         read -n 1 choice
         case $choice in
             y|Y)
@@ -220,6 +285,16 @@ pkgs(){
             n|N)
                 extrapkgs=0
                 loop=0
+                ;;
+            h|H)
+                clear
+                echo -e '\e[3m'"Help page: Additional Packages"
+                echo
+                echo "Includes packages such as extra terminal utilies, an ad blocker, and support for more filesystems such as NTFS and APFS."
+                echo "This adds some time to the installation process and is ideal for working alongside Windows or macOS."
+                echo
+                echo -e '\e[3m'"Press any key to continue..."
+                read -n 1
                 ;;
             *)
                 ;;
@@ -232,6 +307,8 @@ pkgs(){
         echo
         echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
         echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
+        echo
+        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
         read -n 1 choice
         case $choice in
             y|Y)
@@ -284,6 +361,16 @@ pkgs(){
             n|N)
                 gamer=0
                 loop=0
+                ;;
+            h|H)
+                clear
+                echo -e '\e[3m'"Help page: Gaming Packages"
+                echo
+                echo "Includes Steam and Lutris to manage your games, compatibility tools to help your games run better, and extra drivers for your graphics card."
+                echo "Choose these if you plan on playing games, doing creative work, or performing other intensive tasks."
+                echo
+                echo -e '\e[3m'"Press any key to continue..."
+                read -n 1
                 ;;
             *)
                 ;;
@@ -377,7 +464,8 @@ bootent(){
     while [[ $loop == 1 ]]; do
         clear
         echo -e '\e[3m'"Show boot menu?"'\e(B\e[m'
-        echo -e '\e[3m'"To detect other boot entries (e.g. Windows), install limine-entry-tool and run limine-scan."'\e(B\e[m'
+        echo -e '\e[3m'"This allows you to select another system (such as Windows) when you start your machine."'\e(B\e[m'
+        echo -e '\e[3m'"To detect other boot entries, install limine-entry-tool and run limine-scan."'\e(B\e[m'
         echo
         echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
         echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
