@@ -109,7 +109,7 @@ diskpart(){
                 ;;
             h|H)
                 clear
-                echo -e '\e[3m'"Help page: Filesystems"
+                echo -e '\e[3m'"Help page: Filesystems"'\e(B\e[m'
                 echo
                 echo -e '\e[35m'"ext4"'\e(B\e[m'":"
                 echo "The default option. Balances performance and simplicity."
@@ -171,9 +171,10 @@ diskpart(){
                 ;;
             h|H)
                 clear
-                echo -e '\e[3m'"Help page: Disk Encryption"
+                echo -e '\e[3m'"Help page: Disk Encryption"'\e(B\e[m'
                 echo
-                echo "This will ask you for an encryption password every time you start your machine. Files on your main partition will be inaccessible without the key, making your system more secure."
+                echo "This will ask you for an encryption password every time you start your machine."
+                echo "Files on your main partition will be inaccessible without the key, making your system more secure."
                 echo "This may cause issues with some boot animations, and your main partition cannot be unlocked if you forget the key."
                 echo
                 echo -e '\e[3m'"Press any key to continue..."
@@ -233,7 +234,7 @@ pkgs(){
                 ;;
             h|H)
                 clear
-                echo -e '\e[3m'"Help page: Package Sets and Desktop Environments"
+                echo -e '\e[3m'"Help page: Package Sets and Desktop Environments"'\e(B\e[m'
                 echo
                 echo -e '\e[35m'"Desktop (Plasma)"'\e(B\e[m'":"
                 echo "An easy-to-use Windows-like desktop which is highly customisable and stable."
@@ -288,7 +289,7 @@ pkgs(){
                 ;;
             h|H)
                 clear
-                echo -e '\e[3m'"Help page: Additional Packages"
+                echo -e '\e[3m'"Help page: Additional Packages"'\e(B\e[m'
                 echo
                 echo "Includes packages such as extra terminal utilies, an ad blocker, and support for more filesystems such as NTFS and APFS."
                 echo "This adds some time to the installation process and is ideal for working alongside Windows or macOS."
@@ -364,7 +365,7 @@ pkgs(){
                 ;;
             h|H)
                 clear
-                echo -e '\e[3m'"Help page: Gaming Packages"
+                echo -e '\e[3m'"Help page: Gaming Packages"'\e(B\e[m'
                 echo
                 echo "Includes Steam and Lutris to manage your games, compatibility tools to help your games run better, and extra drivers for your graphics card."
                 echo "Choose these if you plan on playing games, doing creative work, or performing other intensive tasks."
@@ -434,6 +435,8 @@ user(){
             echo "Invalid username!"
         fi
     done
+    clear
+    read -p "Enter your user's full name (can be multiple words): " fullname
     clear
     valid=0
     while [[ $valid == 0 ]]; do
@@ -517,9 +520,9 @@ bootent(){
 
 intchk(){
     echo "Checking internet connection..."
-    # Ping Arch Linux servers
+    # Attempt to sync databases
     set +e
-    ping -c 1 -W 2 archlinux.org >/dev/null
+    pacman -Syy &>/dev/null
     connect=$?
     set -e
     if [[ $connect == 0 ]]; then
@@ -534,6 +537,7 @@ intchk(){
             echo
             echo -e '\e[36m'"[Y]" '\e(B\e[m'"List available wireless networks"
             echo -e '\e[36m'"[N]" '\e(B\e[m'"Cancel installation"
+            echo -e '\e[36m'"[P]" '\e(B\e[m'"Attempt to continue anyway (only do this if you are sure you have internet access!)"
             read -n 1 choice
             case $choice in
                 y|Y)
@@ -555,6 +559,10 @@ intchk(){
                     ;;
                 n|N)
                     quit=1
+                    loop=0
+                    ;;
+                p|P)
+                    quit=0
                     loop=0
                     ;;
                 *)
@@ -593,7 +601,6 @@ done
 sed -i "s/#Color/Color/" /etc/pacman.conf
 sed -i "s/ParallelDownloads = 5/ParallelDownloads = 1/" /etc/pacman.conf
 sed -i "s/#NoProgressBar/ILoveCandy/" /etc/pacman.conf
-pacman -Syy
 
 # Get options
 setlocale
@@ -653,6 +660,7 @@ while [[ $menu == 1 ]]; do
         echo "Root password:          $rootstar"
     fi
     echo "Username:               $uname"
+    echo "Full name:              $fullname"
     echo "Password:               $star"
     case $bootmenu in
         0)
@@ -737,18 +745,20 @@ if [[ $reg == "GB" ]]; then
     echo "ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime" >> jdai-efi-2.sh
     echo "hwclock --systohc" >> jdai-efi-2.sh
 fi
+cat >> jdai-efi-2.sh << "EOF"
 # Generate locale
-echo "locale-gen" >> jdai-efi-2.sh
+locale-gen
 # Generate initramfs
-echo "mkinitcpio -P" >> jdai-efi-2.sh
+mkinitcpio -P
 # Enable system services
-echo "systemctl enable ip6tables iptables iwd NetworkManager-dispatcher NetworkManager systemd-network-generator systemd-networkd wpa_supplicant" >> jdai-efi-2.sh
-echo "systemctl enable accounts-daemon" >> jdai-efi-2.sh
-echo "systemctl enable udisks2" >> jdai-efi-2.sh
-echo "systemctl enable upower" >> jdai-efi-2.sh
-echo "systemctl enable sddm" >> jdai-efi-2.sh
-echo "systemctl enable lightdm" >> jdai-efi-2.sh
-echo "systemctl enable wireplumber" >> jdai-efi-2.sh
+systemctl enable ip6tables iptables iwd NetworkManager-dispatcher NetworkManager systemd-network-generator systemd-networkd wpa_supplicant
+systemctl enable accounts-daemon
+systemctl enable udisks2
+systemctl enable upower
+systemctl enable sddm
+systemctl enable lightdm
+systemctl enable wireplumber
+EOF
 # Create boot entry
 if [[ $uefiboot == 1 ]]; then
     echo "efibootmgr --create --disk /dev/${disk} --part 1 --label \"Arch Linux\" --loader '\\BOOTX64.EFI' --unicode" >> jdai-efi-2.sh
@@ -763,12 +773,14 @@ echo "cd /home/$uname" >> jdai-efi-2.sh
 # Run child script as new user
 echo "su $uname -c ./jdai-usr.sh" >> jdai-efi-2.sh
 
+cat >> jdai-usr.sh << "EOF"
 # Clone and build yay
-echo "sudo pacman -Syy" >> jdai-usr.sh
-echo "git clone https://aur.archlinux.org/yay.git" >> jdai-usr.sh
-echo "cd yay" >> jdai-usr.sh
-echo "makepkg -si --noconfirm" >> jdai-usr.sh
-#echo "yay -S --noconfirm limine-entry-tool" >> jdai-usr.sh
+sudo pacman -Syy
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si --noconfirm
+#yay -S --noconfirm limine-entry-tool
+EOF
 
 # Install extra packages if selected
 if [[ $extrapkgs == 1 ]]; then
@@ -779,33 +791,38 @@ if [[ $gamer == 1 ]]; then
 fi
 # Install Plasma configuration files
 if [[ $profile == "Desktop (Plasma)" ]]; then
-    echo "cd .." >> jdai-usr.sh
-    echo "git clone https://github.com/JaredDinosaur/plasmaconf" >> jdai-usr.sh
-    echo "cd plasmaconf" >> jdai-usr.sh
-    echo "mv kde_settings.conf .." >> jdai-usr.sh
-    echo "cp ./* ~/.config" >> jdai-usr.sh
-    echo "mv ../kde_settings.conf ." >> jdai-usr.sh
-    echo "sudo cp kde_settings.conf /etc/sddm.conf.d" >> jdai-usr.sh
+    cat >> jdai-usr.sh << "EOF"
+cd ..
+git clone https://github.com/JaredDinosaur/plasmaconf
+cd plasmaconf
+mv kde_settings.conf ..
+cp ./* ~/.config
+mv ../kde_settings.conf .
+sudo cp kde_settings.conf /etc/sddm.conf.d
+EOF
 fi
 # Install hyprland configuration files
 if [[ $profile == "Desktop (Hyprland)" ]]; then
-    echo "cd .." >> jdai-usr.sh
-    echo "git clone https://github.com/JaredDinosaur/hyprconf" >> jdai-usr.sh
-    echo "cd hyprconf" >> jdai-usr.sh
-    echo "mkdir ~/.config/hypr" >> jdai-usr.sh
-    echo "mkdir ~/.config/kitty" >> jdai-usr.sh
-    echo "cp hyprland.conf ~/.config/hypr" >> jdai-usr.sh
-    echo "cp kitty.conf ~/.config/kitty" >> jdai-usr.sh
-    echo "sudo cp config.jsonc /etc/xdg/waybar" >> jdai-usr.sh
-    echo "sudo cp style.css /etc/xdg/waybar" >> jdai-usr.sh
+    cat >> jdai-usr.sh << "EOF"
+cd .." >> jdai-usr.sh
+git clone https://github.com/JaredDinosaur/hyprconf
+cd hyprconf
+mkdir ~/.config/hypr
+mkdir ~/.config/kitty
+cp hyprland.conf ~/.config/hypr
+cp kitty.conf ~/.config/kitty
+sudo cp config.jsonc /etc/xdg/waybar
+sudo cp style.css /etc/xdg/waybar
+EOF
 fi
 
 ## Scan for other boot entries
 #if [[ $bootmenu == 1 ]]; then
-#    echo "echo" >> jdai-usr.sh
-#    echo "echo" >> jdai-usr.sh
-#    echo "echo" >> jdai-usr.sh
-#    echo "sudo limine-scan" >> jdai-usr.sh
+#cat >> jdai-usr.sh << "EOF"
+#echo
+#echo
+#echo
+#sudo limine-scan
 #fi
 
 case $manpart in
@@ -874,7 +891,7 @@ EOF
             echo " Type | Size"
             echo "------|----------------------------"
             echo " Boot | 256MB to 1GB"
-            echo " Swap | Same as RAM"
+            echo " Swap | Double your RAM"
             echo " Root | 8GB min, 32GB+ recommended"
             echo 
             echo "Press any key to open cfdisk."
@@ -1078,6 +1095,8 @@ else
 fi
 # Add user
 arch-chroot /mnt useradd -m -G wheel $uname
+# Set full name
+arch-chroot /mnt chfn -f "$fullname" $uname
 # Set password
 arch-chroot /mnt chpasswd <<< "$uname:$pass"
 # Run child script within chroot
