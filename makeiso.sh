@@ -1,23 +1,33 @@
 #!/bin/bash
 set -e
 sudo pacman -S --needed archiso squashfs-tools xorriso
-mkdir -p archiso
-sudo rm -rf archiso
+if [[ -d "archiso" ]]; then
+	sudo rm -rf archiso
+fi
 mkdir -p archiso
 cd archiso
 cp -r /usr/share/archiso/configs/releng jdae
 cd jdae
-echo "networkmanager" >> packages.x86_64
-echo "network-manager-applet" >> packages.x86_64
-echo "wireless_tools" >> packages.x86_64
-echo "wpa_supplicant" >> packages.x86_64
-echo "iw" >> packages.x86_64
-echo "dialog" >> packages.x86_64
-echo "usbutils" >> packages.x86_64
-echo "pciutils" >> packages.x86_64
-echo "hwinfo" >> packages.x86_64
+cat >> packages.x86_64 << "EOF"
+networkmanager
+network-manager-applet
+wireless_tools
+wpa_supplicant
+iw
+dialog
+usbutils
+pciutils
+hwinfo
+EOF
+
+sed -i "s/#Color/Color/" pacman.conf
+sed -i "s/ParallelDownloads = 5/ParallelDownloads = 1/" pacman.conf
+sed -i "s/#NoProgressBar/ILoveCandy/" pacman.conf
+sed -i "s/iso_name=\"archlinux\"/iso_name=\"jdae\"/" profiledef.sh
+sed -i "s/iso_label=\"ARCH/iso_label=\"JDAE/" profiledef.sh
+sed -i "s/iso_publisher=\"Arch Linux <https:\/\/archlinux.org>\"/iso_publisher=\"Jared Dinosaur <https:\/\/github.com\/JaredDinosaur>\"/" profiledef.sh
 install -Dm755 ../../jdae.sh airootfs/usr/local/bin/jdae.sh
-cat > airootfs/root/.zlogin << 'EOF'
+cat > airootfs/root/.zlogin << "EOF"
 if [[ $(tty) == "/dev/tty1" ]]; then
     /bin/bash /usr/local/bin/jdae.sh
     echo ""
@@ -34,6 +44,7 @@ if [[ $(tty) == "/dev/tty1" ]]; then
     echo ""
 fi
 EOF
+
 sudo rm -rf work out
 cd ..
 sudo mkarchiso -v jdae
