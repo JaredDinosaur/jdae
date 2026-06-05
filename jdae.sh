@@ -246,7 +246,7 @@ pkgs(){
                 echo
                 echo -e '\e[35m'"Desktop (Xfce)"'\e(B\e[m'":"
                 echo "A somewhat Mac-like desktop which is fast and customisable."
-                echo "It is slightly more complicated than Plama."
+                echo "It is slightly more complicated than Plasma."
                 echo
                 echo -e '\e[35m'"Desktop (LXQt)"'\e(B\e[m'":"
                 echo "A more advanced but very lightweight Windows-like desktop."
