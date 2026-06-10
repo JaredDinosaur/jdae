@@ -291,7 +291,7 @@ pkgs(){
                 clear
                 echo -e '\e[3m'"Help page: Additional Packages"'\e(B\e[m'
                 echo
-                echo "Includes packages such as extra terminal utilies, an ad blocker, and support for more filesystems such as NTFS and APFS."
+                echo "Includes packages such as extra terminal utilities, an ad blocker, and support for more filesystems such as NTFS and APFS."
                 echo "This adds some time to the installation process and is ideal for working alongside Windows or macOS."
                 echo
                 echo -e '\e[3m'"Press any key to continue..."
