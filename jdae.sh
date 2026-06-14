@@ -4,18 +4,14 @@ setlocale(){
     loop=1
     while [[ $loop == 1 ]]; do
         clear
-        echo -e '\e[3m'"Select your locale: "'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[1]" '\e(B\e[m'"English - United Kingdom" '\e[35m'"(default)"
-        echo -e '\e[36m'"[2]" '\e(B\e[m'"English - United States"
-        read -n 1 choice
+        choice=$(gum choose "English - United Kingdom (default)" "English - United States" --header="Select your locale:")
         case $choice in
-            1)
+            "English - United Kingdom (default)")
                 keys="uk"
                 reg="GB"
                 loop=0
                 ;;
-            2)
+            "English - United States")
                 keys="--default"
                 reg="US"
                 loop=0
@@ -36,21 +32,16 @@ diskpart(){
         hwinfo --disk --short
         echo
         echo "Recommended minimum disk space: 64GB for VMs, 128GB for real hardware"
-        read -p "The disk to install to is /dev/___: " disk
+        disk=$(gum input --prompt="The disk to install to is /dev/" --placeholder="disk")
         echo
         echo -e '\e[3m'"WARNING: The contents of this disk will be changed or erased!"'\e(B\e[m'
         echo -e '\e[3m'"Double check that you have selected the correct disk!"'\e(B\e[m'
-        echo -e '\e[3m'"Are you sure you want to continue?"'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[Y]" '\e(B\e[m'"I understand, continue"
-        echo -e '\e[36m'"[N]" '\e(B\e[m'"Choose another disk"
-        echo -e '\e[36m'"[Q]" '\e(B\e[m'"Cancel the installation (power off)"
-        read -n 1 choice
+        choice=$(gum choose "I understand, continue" "Choose another disk" "Cancel the installation (power off)" --header="Are you sure you want to continue?")
         case $choice in
-            y|Y)
+            "I understand, continue")
                 loop=0
                 ;;
-            q|Q)
+            "Cancel the installation (power off)")
                 poweroff
                 exit 1
                 ;;
@@ -61,13 +52,9 @@ diskpart(){
     loop=1
     while [[ $loop == 1 ]]; do
         clear
-        echo -e '\e[3m'"Choose a partitioning method:"'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[1]" '\e(B\e[m'"Automatic partition layout (uses entire disk)"
-        echo -e '\e[36m'"[2]" '\e(B\e[m'"Manual configuration"
-        read -n 1 choice
+        choice=$(gum choose "Automatic partition layout (uses entire disk)" "Manual configuration" --header="Choose a partitioning method:")
         case $choice in
-            1)
+            "Automatic partition layout (uses entire disk)")
                 rootno=3
                 bootno=1
                 swapno=2
@@ -75,7 +62,7 @@ diskpart(){
                 manpart=0
                 loop=0
                 ;;
-            2)
+            "Manual configuration")
                 manpart=1
                 loop=0
                 ;;
@@ -86,28 +73,21 @@ diskpart(){
     loop=1
     while [[ $loop == 1 ]]; do
         clear
-        echo -e '\e[3m'"Choose a root filesystem:"'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[1]" '\e(B\e[m'"ext4" '\e[35m'"(default)"
-        echo -e '\e[36m'"[2]" '\e(B\e[m'"btrfs"
-        echo -e '\e[36m'"[3]" '\e(B\e[m'"xfs"
-        echo
-        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
-        read -n 1 choice
+        choice=$(gum choose "ext4 (default)" "btrfs" "xfs" "Help" --header="Choose a root filesystem:")
         case $choice in
-            1)
+            "ext4 (default)")
                 rootfs="ext4"
                 loop=0
                 ;;
-            2)
+            "btrfs")
                 rootfs="btrfs"
                 loop=0
                 ;;
-            3)
+            "xfs")
                 rootfs="xfs"
                 loop=0
                 ;;
-            h|H)
+            "Help")
                 clear
                 echo -e '\e[3m'"Help page: Filesystems"'\e(B\e[m'
                 echo
@@ -130,27 +110,21 @@ diskpart(){
     loop=1
     while [[ $loop == 1 ]]; do
         clear
-        echo -e '\e[3m'"Would you like to encrypt your root partition?"'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
-        echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
-        echo
-        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
-        read -n 1 choice
+        choice=$(gum choose "Yes" "No" "Help" --header="Would you like to encrypt your root partition?")
         case $choice in
-            y|Y)
+            "Yes")
                 crypt=1
                 clear
                 valid=0
                 while [[ $valid == 0 ]]; do
-                    read -s -p "Enter the encryption password (will not show): " cryptpass
+                    cryptpass=$(gum input --prompt="Enter the encryption password: " --password)
                     if [[ $cryptpass == "" ]]; then
                         clear
                         echo "Password cannot be blank!"
                         echo
                     else
-                        echo
-                        read -s -p "Confirm password: " cryptconf
+                        clear
+                        cryptconf=$(gum input --prompt="Confirm password: " --password)
                         if [[ $cryptconf == $cryptpass ]]; then
                             clear
                             printf -v cryptstar '%*s' "${#cryptpass}" ''
@@ -165,11 +139,11 @@ diskpart(){
                 done
                 loop=0
                 ;;
-            n|N)
+            "No")
                 crypt=0
                 loop=0
                 ;;
-            h|H)
+            "Help")
                 clear
                 echo -e '\e[3m'"Help page: Disk Encryption"'\e(B\e[m'
                 echo
@@ -190,49 +164,39 @@ pkgs(){
     loop=1
     while [[ $loop == 1 ]]; do
         clear
-        echo -e '\e[3m'"Choose a set of packages:"'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[1]" '\e(B\e[m'"Desktop with Plasma" '\e[35m'"(default)"
-        echo -e '\e[36m'"[2]" '\e(B\e[m'"Desktop with Hyprland"
-        echo -e '\e[36m'"[3]" '\e(B\e[m'"Desktop with Xfce"
-        echo -e '\e[36m'"[4]" '\e(B\e[m'"Desktop with LXQt"
-        echo -e '\e[36m'"[5]" '\e(B\e[m'"Command line"
-        echo -e '\e[36m'"[6]" '\e(B\e[m'"Minimal"
-        echo
-        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
-        read -n 1 choice
+        choice=$(gum choose "Desktop with Plasma (default)" "Desktop with Hyprland" "Desktop with Xfce" "Desktop with LXQt" "Command line" "Minimal" "Help" --header="Choose a set of packages:")
         case $choice in
-            1)
+            "Desktop with Plasma (default)")
                 pkglist="base linux linux-firmware firefox flatpak screenfetch tree htop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs"
                 profile="Desktop (Plasma)"
                 loop=0
                 ;;
-            2)
+            "Desktop with Hyprland")
                 pkglist="base linux linux-firmware firefox flatpak screenfetch tree htop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc iwd hyprland kitty wofi waybar hyprpaper git nano konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs"
                 profile="Desktop (Hyprland)"
                 loop=0
                 ;;
-            3)
+            "Desktop with Xfce")
                 pkglist="base linux linux-firmware firefox flatpak screenfetch tree htop xfce4 xfce4-goodies plymouth discover packagekit packagekit-qt6 vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs"
                 profile="Desktop (Xfce)"
                 loop=0
                 ;;
-            4)
+            "Desktop with LXQt")
                 pkglist="base linux linux-firmware firefox flatpak screenfetch tree htop partitionmanager plymouth discover packagekit packagekit-qt6 lxqt vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs"
                 profile="Desktop (LXQt)"
                 loop=0
                 ;;
-            5)
+            "Command line")
                 pkglist="base linux linux-firmware screenfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs"
                 profile="Command line"
                 loop=0
                 ;;
-            6)
+            "Minimal")
                 pkglist="base linux linux-firmware git iwd python nano limine sudo efibootmgr networkmanager base-devel"
                 profile="Minimal"
                 loop=0
                 ;;
-            h|H)
+            "Help")
                 clear
                 echo -e '\e[3m'"Help page: Package Sets and Desktop Environments"'\e(B\e[m'
                 echo
@@ -272,22 +236,17 @@ pkgs(){
         clear
         echo -e '\e[3m'"Install additional packages?"'\e(B\e[m'
         echo -e '\e[3m'"This includes an ad blocker, antivirus, and support for additional file systems."'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
-        echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
-        echo
-        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
-        read -n 1 choice
+        choice=$(gum choose "Yes" "No" "Help" --header="")
         case $choice in
-            y|Y)
+            "Yes")
                 extrapkgs=1
                 loop=0
                 ;;
-            n|N)
+            "No")
                 extrapkgs=0
                 loop=0
                 ;;
-            h|H)
+            "Help")
                 clear
                 echo -e '\e[3m'"Help page: Additional Packages"'\e(B\e[m'
                 echo
@@ -304,50 +263,38 @@ pkgs(){
     loop=1
     while [[ $loop == 1 ]]; do
         clear
-        echo -e '\e[3m'"Install Steam, GPU drivers, and additional gaming features?"'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
-        echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
-        echo
-        echo -e '\e[36m'"[H]" '\e(B\e[m'"Help"
-        read -n 1 choice
+        choice=$(gum choose "Yes" "No" "Help" --header="Install Steam, GPU drivers, and additional gaming features?")
         case $choice in
-            y|Y)
+            "Yes")
                 loop=1
                 while [[ $loop == 1 ]]; do
                     clear
                     echo -e '\e[3m'"Select your graphics card manufacturer."'\e(B\e[m'
                     echo -e '\e[3m'"For Nvidia, proprietary drivers are better for more recent cards (GTX 1650 or newer)."'\e(B\e[m'
                     echo -e '\e[3m'"If your machine has no graphics card, select your CPU manufacturer."'\e(B\e[m'
-                    echo
-                    echo -e '\e[36m'"[1]" '\e(B\e[m'"Intel"
-                    echo -e '\e[36m'"[2]" '\e(B\e[m'"AMD (Radeon)"
-                    echo -e '\e[36m'"[3]" '\e(B\e[m'"Nvidia (Open Source)"
-                    echo -e '\e[36m'"[4]" '\e(B\e[m'"Nvidia (Proprietary)"
-                    echo -e '\e[36m'"[5]" '\e(B\e[m'"Other"
-                    read -n 1 choice
+                    choice=$(gum choose "Intel" "AMD (Radeon)" "Nvidia (Open Source)" "Nvidia (Proprietary)" "Other" --header="")
                     case $choice in
-                        1)
+                        "Intel")
                             gpupkg=" vulkan-intel xf86-video-intel lib32-vulkan-intel"
                             gpuconf="Intel"
                             loop=0
                             ;;
-                        2)
+                        "AMD (Radeon)")
                             gpupkg=" vulkan-radeon xf86-video-amdgpu lib32-vulkan-radeon"
                             gpuconf="AMD (Radeon)"
                             loop=0
                             ;;
-                        3)
+                        "Nvidia (Open Source)")
                             gpupkg=" vulkan-nouveau xf86-video-nouveau lib32-vulkan-nouveau"
                             gpuconf="Nvidia (Open Source)"
                             loop=0
                             ;;
-                        4)
+                        "Nvidia (Proprietary)")
                             gpupkg=" nvidia nvidia-utils lib32-nvidia-utils"
                             gpuconf="Nvidia (Proprietary)"
                             loop=0
                             ;;
-                        5)
+                        "Other")
                             gpupkg=""
                             gpuconf="Other"
                             loop=0
@@ -359,11 +306,11 @@ pkgs(){
                 gamer=1
                 loop=0
                 ;;
-            n|N)
+            "No")
                 gamer=0
                 loop=0
                 ;;
-            h|H)
+            "Help")
                 clear
                 echo -e '\e[3m'"Help page: Gaming Packages"'\e(B\e[m'
                 echo
@@ -383,7 +330,7 @@ sethostname(){
     clear
     valid=0
     while [[ $valid == 0 ]]; do
-        read -p "Name your machine (letters, numbers and dashes): " hname
+        hname=$(gum input --prompt="Name your machine (letters, numbers and dashes): " --char-limit=32)
         if [[ "$hname" =~ ^[a-zA-Z0-9-]+$ ]]; then
             valid=1
         else
@@ -397,12 +344,12 @@ user(){
     clear
     valid=0
     while [[ $valid == 0 ]]; do
-        read -s -p "Enter the root password (will not show): " rootpass
+        rootpass=$(gum input --prompt="Enter the root password: " --password)
         if [[ $rootpass == "" ]]; then
             clear
             echo
             echo "This will disable the root account! Are you sure?"
-            read -p "Enter \"Yes, I understand\" to continue: " rootconf
+            rootconf=$(gum input --prompt="Enter \"Yes, I understand\" to continue, or anything else to go back: " --placeholder="Yes, I understand")
             if [[ $rootconf == "Yes, I understand" ]]; then
                 clear
                 valid=1
@@ -410,8 +357,8 @@ user(){
                 clear
             fi
         else
-            echo
-            read -s -p "Confirm password: " rootconf
+            clear
+            rootconf=$(gum input --prompt="Confirm password: " --password)
             if [[ $rootconf == $rootpass ]]; then
                 clear
                 printf -v rootstar '%*s' "${#rootpass}" ''
@@ -427,7 +374,7 @@ user(){
     clear
     valid=0
     while [[ $valid == 0 ]]; do
-        read -p "Name your user (single word, lowercase): " uname
+        uname=$(gum input --prompt="Name your user (single word, lowercase): " --char-limit=32)
         if [[ "$uname" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
             valid=1
         else
@@ -436,18 +383,18 @@ user(){
         fi
     done
     clear
-    read -p "Enter your user's full name (can be multiple words): " fullname
+    fullname=$(gum input --prompt="Enter your user's full name (can be multiple words): ")
     clear
     valid=0
     while [[ $valid == 0 ]]; do
-        read -s -p "Enter your user's password (will not show): " pass
+        pass=$(gum input --prompt="Enter your user's password: " --password)
         if [[ $pass == "" ]]; then
             clear
             echo "Password cannot be blank!"
             echo
         else
-            echo
-            read -s -p "Confirm password: " passconf
+            clear
+            passconf=$(gum input --prompt="Confirm password: " --password)
             if [[ $passconf == $pass ]]; then
                 clear
                 printf -v star '%*s' "${#pass}" ''
@@ -469,16 +416,13 @@ bootent(){
         echo -e '\e[3m'"Show boot menu?"'\e(B\e[m'
         echo -e '\e[3m'"This allows you to select another system (such as Windows) when you start your machine."'\e(B\e[m'
         echo -e '\e[3m'"To detect other boot entries, install limine-entry-tool and run limine-scan."'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
-        echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
-        read -n 1 choice
+        choice=$(gum choose "Yes" "No" --header="")
         case $choice in
-            y|Y)
+            "Yes")
                 bootmenu=1
                 loop=0
                 ;;
-            n|N)
+            "No")
                 bootmenu=0
                 loop=0
                 ;;
@@ -490,13 +434,9 @@ bootent(){
     while [[ $loop == 1 ]]; do
         clear
         echo -e '\e[3m'"This machine is currently booted in $bootmode mode."'\e(B\e[m'
-        echo -e '\e[3m'"Would you like to make your system bootable in both BIOS and UEFI mode?"'\e(B\e[m'
-        echo
-        echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
-        echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
-        read -n 1 choice
+        choice=$(gum choose "Yes" "No" --header="Would you like to make your system bootable in both BIOS and UEFI mode?")
         case $choice in
-            y|Y)
+            "Yes")
                 if [[ $bootmode == "BIOS" ]]; then
                     uefiboot=1
                 else
@@ -504,7 +444,7 @@ bootent(){
                 fi
                 loop=0
                 ;;
-            n|N)
+            "No")
                 if [[ $bootmode == "BIOS" ]]; then
                     uefiboot=0
                 else
@@ -534,13 +474,9 @@ intchk(){
             clear
             echo -e '\e[3m'"Internet connection not found! Would you like to connect to a wireless network?"'\e(B\e[m'
             echo -e '\e[3m'"If you are definitely connected to the internet, the Arch Linux servers may be down."'\e(B\e[m'
-            echo
-            echo -e '\e[36m'"[Y]" '\e(B\e[m'"List available wireless networks"
-            echo -e '\e[36m'"[N]" '\e(B\e[m'"Cancel installation"
-            echo -e '\e[36m'"[P]" '\e(B\e[m'"Attempt to continue anyway (only do this if you are sure you have internet access!)"
-            read -n 1 choice
+            choice=$(gum choose "List available wireless networks" "Cancel installation" "Attempt to continue anyway" --header="")
             case $choice in
-                y|Y)
+                "List available wireless networks")
                     clear
                     # List available wireless networks
                     iface=$(iw dev | awk '$1=="Interface"{print $2; exit}')
@@ -550,18 +486,18 @@ intchk(){
                         loop=0
                     else
                         iwctl station "$iface" get-networks
-                        read -p "Enter the name of the network you wish to connect to: " ssid
+                        ssid=$(gum input --prompt="Enter the name of the network you wish to connect to: ")
                         # Connect to the selected network
                         iwctl station "$iface" connect "$ssid"
                         quit=2
                         loop=0
                     fi
                     ;;
-                n|N)
+                "Cancel installation")
                     quit=1
                     loop=0
                     ;;
-                p|P)
+                "Attempt to continue anyway")
                     quit=0
                     loop=0
                     ;;
@@ -685,48 +621,35 @@ while [[ $menu == 1 ]]; do
             esac
             ;;
     esac
-    echo
-    echo -e '\e[3m'"Install with these options?"'\e(B\e[m'
-    echo
     echo "-------------------------------------"
     echo
-    echo -e '\e[36m'"[Y]" '\e(B\e[m'"Begin installation"
-    echo -e '\e[36m'"[N]" '\e(B\e[m'"Cancel installation (power off)"
-    echo -e '\e[36m'"[Q]" '\e(B\e[m'"Exit to shell"
-    echo
-    echo -e '\e[36m'"[1]" '\e(B\e[m'"Change locale"
-    echo -e '\e[36m'"[2]" '\e(B\e[m'"Change partitioning and encryption"
-    echo -e '\e[36m'"[3]" '\e(B\e[m'"Change packages and drivers"
-    echo -e '\e[36m'"[4]" '\e(B\e[m'"Change hostname"
-    echo -e '\e[36m'"[5]" '\e(B\e[m'"Change username and authentication"
-    echo -e '\e[36m'"[6]" '\e(B\e[m'"Change boot options"
-    read -n 1 choice
+    choice=$(gum choose "Begin installation" "Cancel installation (power off)" "Exit to shell" "Change locale" "Change partitioning and encryption" "Change packages and drivers" "Change hostname" "Change username and authentication" "Change boot options" --header="Install with these options?")
     case $choice in
-        y|Y)
+        "Begin installation")
             menu=0
             ;;
-        n|N)
+        "Cancel installation (power off)")
             poweroff
             ;;
-        q|Q)
+        "Exit to shell")
             exit 1
             ;;
-        1)
+        "Change locale")
             setlocale
             ;;
-        2)
+        "Change partitioning and encryption")
             diskpart
             ;;
-        3)
+        "Change packages and drivers")
             pkgs
             ;;
-        4)
+        "Change hostname")
             sethostname
             ;;
-        5)
+        "Change username and authentication")
             user
             ;;
-        6)
+        "Change boot options")
             bootent
             ;;
         *)
@@ -1110,23 +1033,17 @@ sed -i 's/^# \(%wheel ALL=(ALL:ALL) ALL\)/\1/' /mnt/etc/sudoers
 loop=1
 while [[ $loop == 1 ]]; do
     clear
-    echo -e '\e[3m'"Installation is complete!"'\e(B\e[m'
-    echo -e '\e[3m'"What would you like to do?"'\e(B\e[m'
-    echo
-    echo -e '\e[36m'"[1]" '\e(B\e[m'"Reboot now"
-    echo -e '\e[36m'"[2]" '\e(B\e[m'"Exit to shell"
-    echo -e '\e[36m'"[3]" '\e(B\e[m'"Clean up and exit (ideal for rerunning the installer)"
-    read -n 1 choice
+    choice=$(gum choose "Reboot now" "Exit to shell" "Clean up and exit" --header="Installation is complete! What would you like to do?")
     case $choice in
-        1)
+        "Reboot now")
             reboot
             loop=0
             ;;
-        2)
+        "Exit to shell")
             clear
             loop=0
             ;;
-        3)
+        "Clean up and exit")
             set +e
             umount /mnt/boot
             umount /mnt

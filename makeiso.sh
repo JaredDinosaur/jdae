@@ -26,6 +26,7 @@ dialog
 usbutils
 pciutils
 hwinfo
+gum
 EOF
 
 sed -i "s/#Color/Color/" pacman.conf
