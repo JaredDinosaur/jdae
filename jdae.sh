@@ -271,7 +271,7 @@ pkgs(){
     while [[ $loop == 1 ]]; do
         clear
         echo -e '\e[3m'"Install additional packages?"'\e(B\e[m'
-        echo -e '\e[3m'"This includes an ad blocker, resource monitor, and support for additional file systems."'\e(B\e[m'
+        echo -e '\e[3m'"This includes an ad blocker, antivirus, and support for additional file systems."'\e(B\e[m'
         echo
         echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes"
         echo -e '\e[36m'"[N]" '\e(B\e[m'"No"
@@ -291,7 +291,7 @@ pkgs(){
                 clear
                 echo -e '\e[3m'"Help page: Additional Packages"'\e(B\e[m'
                 echo
-                echo "Includes packages such as extra terminal utilities, an ad blocker, and support for more filesystems such as NTFS and APFS."
+                echo "Includes packages such as an antivirus, extra terminal utilities, an ad blocker, and support for more filesystems such as NTFS and APFS."
                 echo "This adds some time to the installation process and is ideal for working alongside Windows or macOS."
                 echo
                 echo -e '\e[3m'"Press any key to continue..."
@@ -367,7 +367,7 @@ pkgs(){
                 clear
                 echo -e '\e[3m'"Help page: Gaming Packages"'\e(B\e[m'
                 echo
-                echo "Includes Steam and Lutris to manage your games, compatibility tools to help your games run better, and extra drivers for your graphics card."
+                echo "Includes Steam and Lutris to manage your games, compatibility tools to run Windows apps under Linux, and extra drivers for your graphics card."
                 echo "Choose these if you plan on playing games, doing creative work, or performing other intensive tasks."
                 echo
                 echo -e '\e[3m'"Press any key to continue..."
@@ -782,9 +782,11 @@ makepkg -si --noconfirm
 #yay -S --noconfirm limine-entry-tool
 EOF
 
-# Install extra packages if selected
+# Install extra packages if selected and enable antivirus
 if [[ $extrapkgs == 1 ]]; then
-    echo "yay -S --noconfirm --needed firefox firefox-i18n-uk firefox-ublock-origin flatpak neofetch screenfetch fastfetch tree htop btop partitionmanager ark thunar konsole dialog exfatprogs f2fs-tools hfsprogs jfsutils ntfs-3g udftools apfsprogs zfs-utils" >> jdai-usr.sh
+    echo "yay -S --noconfirm --needed firefox firefox-i18n-uk firefox-ublock-origin flatpak neofetch screenfetch fastfetch tree htop btop partitionmanager ark thunar konsole dialog exfatprogs f2fs-tools hfsprogs jfsutils ntfs-3g udftools apfsprogs zfs-utils clamav clamtk" >> jdai-usr.sh
+    echo "sudo freshclam" >> jdai-usr.sh
+    echo "sudo systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam" >> jdai-usr.sh
 fi
 if [[ $gamer == 1 ]]; then
     echo "yay -S --noconfirm --needed steam gamescope lutris winboat mesa$gpupkg" >> jdai-usr.sh
