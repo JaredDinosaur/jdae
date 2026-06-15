@@ -32,7 +32,7 @@ diskpart(){
         hwinfo --disk --short
         echo
         echo "Recommended minimum disk space: 64GB for VMs, 128GB for real hardware"
-        disk=$(gum input --prompt="The disk to install to is /dev/" --placeholder="disk")
+        disk=$(gum input --prompt="The disk to install to is /dev/")
         echo
         echo -e '\e[3m'"WARNING: The contents of this disk will be changed or erased!"'\e(B\e[m'
         echo -e '\e[3m'"Double check that you have selected the correct disk!"'\e(B\e[m'
@@ -100,7 +100,7 @@ diskpart(){
                 echo -e '\e[35m'"xfs"'\e(B\e[m'":"
                 echo "High performance filesystem. Good for servers and large drives."
                 echo
-                echo -e '\e[3m'"Press any key to continue..."
+                echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
                 read -n 1
                 ;;
             *)
@@ -151,7 +151,7 @@ diskpart(){
                 echo "Files on your main partition will be inaccessible without the key, making your system more secure."
                 echo "This may cause issues with some boot animations, and your main partition cannot be unlocked if you forget the key."
                 echo
-                echo -e '\e[3m'"Press any key to continue..."
+                echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
                 read -n 1
                 ;;
             *)
@@ -224,7 +224,7 @@ pkgs(){
                 echo "The most basic set of packages with no extras."
                 echo "This is recommended for servers or extremely slow machines."
                 echo
-                echo -e '\e[3m'"Press any key to continue..."
+                echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
                 read -n 1
                 ;;
             *)
@@ -253,7 +253,7 @@ pkgs(){
                 echo "Includes packages such as an antivirus, extra terminal utilities, an ad blocker, and support for more filesystems such as NTFS and APFS."
                 echo "This adds some time to the installation process and is ideal for working alongside Windows or macOS."
                 echo
-                echo -e '\e[3m'"Press any key to continue..."
+                echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
                 read -n 1
                 ;;
             *)
@@ -317,7 +317,7 @@ pkgs(){
                 echo "Includes Steam and Lutris to manage your games, compatibility tools to run Windows apps under Linux, and extra drivers for your graphics card."
                 echo "Choose these if you plan on playing games, doing creative work, or performing other intensive tasks."
                 echo
-                echo -e '\e[3m'"Press any key to continue..."
+                echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
                 read -n 1
                 ;;
             *)
@@ -621,7 +621,8 @@ while [[ $menu == 1 ]]; do
             esac
             ;;
     esac
-    echo "-------------------------------------"
+    echo
+    echo "------------------------------------------------"
     echo
     choice=$(gum choose "Begin installation" "Cancel installation (power off)" "Exit to shell" "Change locale" "Change partitioning and encryption" "Change packages and drivers" "Change hostname" "Change username and authentication" "Change boot options" --header="Install with these options?")
     case $choice in
@@ -712,7 +713,9 @@ if [[ $extrapkgs == 1 ]]; then
     echo "sudo systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam" >> jdai-usr.sh
 fi
 if [[ $gamer == 1 ]]; then
-    echo "yay -S --noconfirm --needed steam gamescope lutris winboat mesa$gpupkg" >> jdai-usr.sh
+    echo "yay -S --noconfirm --needed steam gamescope lutris winboat mesa docker docker-compose$gpupkg" >> jdai-usr.sh
+    echo "sudo usermod -aG docker $uname" >> jdai-usr.sh
+    echo "sudo systemctl enable docker" >> jdai-usr.sh
 fi
 # Install Plasma configuration files
 if [[ $profile == "Desktop (Plasma)" ]]; then
