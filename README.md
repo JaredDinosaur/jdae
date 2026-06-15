@@ -9,3 +9,4 @@ The .sh files in the repo are for building the system yourself! Precompiled .iso
 - XFS can rarely fail to format on unencrypted, non-empty disks.
 - The internet connection test may sometimes fail when a connection is present.
 - Selecting "Other" for GPU drivers can install the default drivers instead (usually Nvidia).
+- Winboat does not recognise Docker until `sudo systemctl start docker` is run.
