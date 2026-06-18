@@ -98,7 +98,7 @@ diskpart(){
                 echo "Has copy-on-write functionality to easily make backups. Good for data integrity, but may run slightly slower."
                 echo
                 echo -e '\e[35m'"xfs"'\e(B\e[m'":"
-                echo "High performance filesystem. Good for servers and large drives."
+                echo "High performance filesystem. Good for servers and large drives, but cannot be shrunk."
                 echo
                 echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
                 read -n 1
@@ -167,27 +167,27 @@ pkgs(){
         choice=$(gum choose "Desktop with Plasma (default)" "Desktop with Hyprland" "Desktop with Xfce" "Desktop with LXQt" "Command line" "Minimal" "Help" --header="Choose a set of packages:")
         case $choice in
             "Desktop with Plasma (default)")
-                pkglist="base linux linux-firmware firefox flatpak screenfetch tree htop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs"
+                pkglist="base linux linux-firmware firefox firefox-i18n-uk firefox-ublock-origin flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano kate konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
                 profile="Desktop (Plasma)"
                 loop=0
                 ;;
             "Desktop with Hyprland")
-                pkglist="base linux linux-firmware firefox flatpak screenfetch tree htop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc iwd hyprland kitty wofi waybar hyprpaper git nano konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs"
+                pkglist="base linux linux-firmware firefox firefox-i18n-uk firefox-ublock-origin flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
                 profile="Desktop (Hyprland)"
                 loop=0
                 ;;
             "Desktop with Xfce")
-                pkglist="base linux linux-firmware firefox flatpak screenfetch tree htop xfce4 xfce4-goodies plymouth discover packagekit packagekit-qt6 vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs"
+                pkglist="base linux linux-firmware firefox firefox-i18n-uk firefox-ublock-origin flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies plymouth discover packagekit packagekit-qt6 vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
                 profile="Desktop (Xfce)"
                 loop=0
                 ;;
             "Desktop with LXQt")
-                pkglist="base linux linux-firmware firefox flatpak screenfetch tree htop partitionmanager plymouth discover packagekit packagekit-qt6 lxqt vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs"
+                pkglist="base linux linux-firmware firefox firefox-i18n-uk firefox-ublock-origin flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth discover packagekit packagekit-qt6 lxqt vlc iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
                 profile="Desktop (LXQt)"
                 loop=0
                 ;;
             "Command line")
-                pkglist="base linux linux-firmware screenfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs"
+                pkglist="base linux linux-firmware screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav"
                 profile="Command line"
                 loop=0
                 ;;
@@ -231,94 +231,282 @@ pkgs(){
                 ;;
         esac
     done
+
+    getwinfs=0
+    getf2fs=0
+    getapplefs=0
+    getjfs=0
+    getudf=0
+    getzfs=0
+    getsteam=0
+    getlutris=0
+    getwinboat=0
+    gpuconf="None"
+    gettimeshift=0
+    getvpn=0
+
     loop=1
     while [[ $loop == 1 ]]; do
         clear
-        echo -e '\e[3m'"Install additional packages?"'\e(B\e[m'
-        echo -e '\e[3m'"This includes an ad blocker, antivirus, and support for additional file systems."'\e(B\e[m'
-        choice=$(gum choose "Yes" "No" "Help" --header="")
+        echo -e '\e[3m'"--------------Extra packages menu----------------"'\e(B\e[m'
+        echo -e '\e[3m'"Select an option to change whether to install it."'\e(B\e[m'
+        echo -e '\e[3m'"-------------------------------------------------"'\e(B\e[m'
+        echo
+
+        echo -e '\e[36m'"[1]" '\e(B\e[m'"Filesystem utilities:"
+        if [[ $getwinfs == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Windows filesystems (NTFS and exFAT): No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Windows filesystems (NTFS and exFAT): Yes"
+        fi
+        if [[ $getapplefs == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"macOS filesystems (HFS and APFS): No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"macOS filesystems (HFS and APFS): Yes"
+        fi
+        if [[ $getzfs == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"ZFS (high performance filesystem): No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"ZFS (high performance filesystem): Yes"
+        fi
+        if [[ $getf2fs == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"f2fs (SSD-friendly filesystem): No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"f2fs (SSD-friendly filesystem): Yes"
+        fi
+        if [[ $getudf == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"UDF (DVD filesystem): No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"UDF (DVD filesystem): Yes"
+        fi
+        if [[ $getjfs == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"JFS (IBM filesystem): No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"JFS (IBM filesystem): Yes"
+        fi
+        echo
+        echo -e '\e[36m'"[2]" '\e(B\e[m'"Gaming packages:"
+        if [[ $getsteam == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Steam: No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Steam: Yes"
+        fi
+        if [[ $getlutris == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Lutris (game manager): No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Lutris (game manager): Yes"
+        fi
+        if [[ $getwinboat == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Winboat (run Windows apps on Linux): No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Winboat (run Windows apps on Linux): Yes"
+        fi
+        echo
+        echo -e '\e[36m'"[3]" '\e(B\e[m'"GPU Driver: $gpuconf"
+        echo
+        if [[ $gettimeshift == 0 ]]; then
+            echo -e '\e[36m'"[4]" '\e(B\e[m'"Timeshift (backup utility): No"
+        else
+            echo -e '\e[36m'"[4]" '\e(B\e[m'"Timeshift (backup utility): Yes"
+        fi
+        echo
+        if [[ $getvpn == 0 ]]; then
+            echo -e '\e[36m'"[5]" '\e(B\e[m'"Proton VPN: No"
+        else
+            echo -e '\e[36m'"[5]" '\e(B\e[m'"Proton VPN: Yes"
+        fi
+        echo
+        echo
+        echo
+        echo -e '\e[36m'"[0]" '\e(B\e[m'"Done"
+        read -n 1 choice
         case $choice in
-            "Yes")
-                extrapkgs=1
-                loop=0
-                ;;
-            "No")
-                extrapkgs=0
-                loop=0
-                ;;
-            "Help")
-                clear
-                echo -e '\e[3m'"Help page: Additional Packages"'\e(B\e[m'
-                echo
-                echo "Includes packages such as an antivirus, extra terminal utilities, an ad blocker, and support for more filesystems such as NTFS and APFS."
-                echo "This adds some time to the installation process and is ideal for working alongside Windows or macOS."
-                echo
-                echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
-                read -n 1
-                ;;
-            *)
-                ;;
-        esac
-    done
-    loop=1
-    while [[ $loop == 1 ]]; do
-        clear
-        choice=$(gum choose "Yes" "No" "Help" --header="Install Steam, GPU drivers, and additional gaming features?")
-        case $choice in
-            "Yes")
-                loop=1
-                while [[ $loop == 1 ]]; do
+            1)
+                submenu=1
+                while [[ $submenu == 1 ]]; do
                     clear
-                    echo -e '\e[3m'"Select your graphics card manufacturer."'\e(B\e[m'
+                    echo -e '\e[3m'"Filesystem utilities:"'\e(B\e[m'
+                    echo
+                    if [[ $getwinfs == 0 ]]; then
+                        echo -e '\e[36m'"[1]" '\e(B\e[m'"Windows filesystems (NTFS and exFAT): No"
+                    else
+                        echo -e '\e[36m'"[1]" '\e(B\e[m'"Windows filesystems (NTFS and exFAT): Yes"
+                    fi
+                    if [[ $getapplefs == 0 ]]; then
+                        echo -e '\e[36m'"[2]" '\e(B\e[m'"macOS filesystems (HFS and APFS): No"
+                    else
+                        echo -e '\e[36m'"[2]" '\e(B\e[m'"macOS filesystems (HFS and APFS): Yes"
+                    fi
+                    if [[ $getzfs == 0 ]]; then
+                        echo -e '\e[36m'"[3]" '\e(B\e[m'"ZFS (high performance filesystem): No"
+                    else
+                        echo -e '\e[36m'"[3]" '\e(B\e[m'"ZFS (high performance filesystem): Yes"
+                    fi
+                    if [[ $getf2fs == 0 ]]; then
+                        echo -e '\e[36m'"[4]" '\e(B\e[m'"f2fs (SSD-friendly filesystem): No"
+                    else
+                        echo -e '\e[36m'"[4]" '\e(B\e[m'"f2fs (SSD-friendly filesystem): Yes"
+                    fi
+                    if [[ $getudf == 0 ]]; then
+                        echo -e '\e[36m'"[5]" '\e(B\e[m'"UDF (DVD filesystem): No"
+                    else
+                        echo -e '\e[36m'"[5]" '\e(B\e[m'"UDF (DVD filesystem): Yes"
+                    fi
+                    if [[ $getjfs == 0 ]]; then
+                        echo -e '\e[36m'"[6]" '\e(B\e[m'"JFS (IBM filesystem): No"
+                    else
+                        echo -e '\e[36m'"[6]" '\e(B\e[m'"JFS (IBM filesystem): Yes"
+                    fi
+                    echo -e '\e[36m'"[7]" '\e(B\e[m'"Yes to all"
+                    echo -e '\e[36m'"[8]" '\e(B\e[m'"No to all"
+                    echo
+                    echo -e '\e[36m'"[0]" '\e(B\e[m'"Go back"
+                    read -n 1 choice
+                    case $choice in
+                        1)
+                            getwinfs=$((1 - getwinfs))
+                            ;;
+                        2)
+                            getapplefs=$((1 - getapplefs))
+                            ;;
+                        3)
+                            getzfs=$((1 - getzfs))
+                            ;;
+                        4)
+                            getf2fs=$((1 - getf2fs))
+                            ;;
+                        5)
+                            getudf=$((1 - getudf))
+                            ;;
+                        6)
+                            getjfs=$((1 - getjfs))
+                            ;;
+                        7)
+                            getwinfs=1
+                            getf2fs=1
+                            getapplefs=1
+                            getjfs=1
+                            getudf=1
+                            getzfs=1
+                            ;;
+                        8)
+                            getwinfs=0
+                            getf2fs=0
+                            getapplefs=0
+                            getjfs=0
+                            getudf=0
+                            getzfs=0
+                            ;;
+                        0)
+                            submenu=0
+                            ;;
+                    esac
+                done
+                ;;
+            2)
+                submenu=1
+                while [[ $submenu == 1 ]]; do
+                    clear
+                    echo -e '\e[3m'"Gaming packages:"'\e(B\e[m'
+                    echo
+                    if [[ $getsteam == 0 ]]; then
+                        echo -e '\e[36m'"[1]" '\e(B\e[m'"Steam: No"
+                    else
+                        echo -e '\e[36m'"[1]" '\e(B\e[m'"Steam: Yes"
+                    fi
+                    if [[ $getlutris == 0 ]]; then
+                        echo -e '\e[36m'"[2]" '\e(B\e[m'"Lutris (game manager): No"
+                    else
+                        echo -e '\e[36m'"[2]" '\e(B\e[m'"Lutris (game manager): Yes"
+                    fi
+                    if [[ $getwinboat == 0 ]]; then
+                        echo -e '\e[36m'"[3]" '\e(B\e[m'"Winboat (run Windows apps on Linux): No"
+                    else
+                        echo -e '\e[36m'"[3]" '\e(B\e[m'"Winboat (run Windows apps on Linux): Yes"
+                    fi
+                    echo -e '\e[36m'"[4]" '\e(B\e[m'"Yes to all"
+                    echo -e '\e[36m'"[5]" '\e(B\e[m'"No to all"
+                    echo
+                    echo -e '\e[36m'"[0]" '\e(B\e[m'"Go back"
+                    read -n 1 choice
+                    case $choice in
+                        1)
+                            getsteam=$((1 - getsteam))
+                            ;;
+                        2)
+                            getlutris=$((1 - getlutris))
+                            ;;
+                        3)
+                            getwinboat=$((1 - getwinboat))
+                            ;;
+                        4)
+                            getsteam=1
+                            getlutris=1
+                            getwinboat=1
+                            ;;
+                        5)
+                            getsteam=0
+                            getlutris=0
+                            getwinboat=0
+                            ;;
+                        0)
+                            submenu=0
+                            ;;
+                    esac
+                done
+                ;;
+            3)
+                submenu=1
+                while [[ $submenu == 1 ]]; do
+                    clear
+                    echo -e '\e[3m'"Select your graphics card driver."'\e(B\e[m'
                     echo -e '\e[3m'"For Nvidia, proprietary drivers are better for more recent cards (GTX 1650 or newer)."'\e(B\e[m'
                     echo -e '\e[3m'"If your machine has no graphics card, select your CPU manufacturer."'\e(B\e[m'
-                    choice=$(gum choose "Intel" "AMD (Radeon)" "Nvidia (Open Source)" "Nvidia (Proprietary)" "Other" --header="")
+                    choice=$(gum choose "Intel" "AMD (Radeon)" "Nvidia (Open Source)" "Nvidia (Proprietary)" "No Driver" --header="")
                     case $choice in
                         "Intel")
-                            gpupkg=" vulkan-intel xf86-video-intel lib32-vulkan-intel"
+                            gpudrv=1
+                            gpupkg="vulkan-intel xf86-video-intel lib32-vulkan-intel"
                             gpuconf="Intel"
-                            loop=0
+                            submenu=0
                             ;;
                         "AMD (Radeon)")
-                            gpupkg=" vulkan-radeon xf86-video-amdgpu lib32-vulkan-radeon"
+                            gpudrv=1
+                            gpupkg="vulkan-radeon xf86-video-amdgpu lib32-vulkan-radeon"
                             gpuconf="AMD (Radeon)"
-                            loop=0
+                            submenu=0
                             ;;
                         "Nvidia (Open Source)")
-                            gpupkg=" vulkan-nouveau xf86-video-nouveau lib32-vulkan-nouveau"
+                            gpudrv=1
+                            gpupkg="vulkan-nouveau xf86-video-nouveau lib32-vulkan-nouveau"
                             gpuconf="Nvidia (Open Source)"
-                            loop=0
+                            submenu=0
                             ;;
                         "Nvidia (Proprietary)")
-                            gpupkg=" nvidia nvidia-utils lib32-nvidia-utils"
+                            gpudrv=1
+                            gpupkg="nvidia nvidia-utils lib32-nvidia-utils"
                             gpuconf="Nvidia (Proprietary)"
-                            loop=0
+                            submenu=0
                             ;;
-                        "Other")
+                        "No Driver")
+                            gpudrv=0
                             gpupkg=""
-                            gpuconf="Other"
-                            loop=0
+                            gpuconf="None"
+                            submenu=0
                             ;;
                         *)
                             ;;
                     esac
                 done
-                gamer=1
-                loop=0
                 ;;
-            "No")
-                gamer=0
-                loop=0
+            4)
+                gettimeshift=$((1 - gettimeshift))
                 ;;
-            "Help")
-                clear
-                echo -e '\e[3m'"Help page: Gaming Packages"'\e(B\e[m'
-                echo
-                echo "Includes Steam and Lutris to manage your games, compatibility tools to run Windows apps under Linux, and extra drivers for your graphics card."
-                echo "Choose these if you plan on playing games, doing creative work, or performing other intensive tasks."
-                echo
-                echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
-                read -n 1
+            5)
+                getvpn=$((1 - getvpn))
+                ;;
+            0)
+                loop=0
                 ;;
             *)
                 ;;
@@ -571,24 +759,7 @@ while [[ $menu == 1 ]]; do
             ;;
     esac
     echo "Profile:                $profile"
-    case $extrapkgs in
-        0)
-            echo "Additional packages:    Disabled"
-            ;;
-        1)
-            echo "Additional packages:    Enabled"
-            ;;
-    esac
-    case $gamer in
-        0)
-            echo "Gaming features:        Disabled"
-            echo "GPU Driver:             None"
-            ;;
-        1)
-            echo "Gaming features:        Enabled"
-            echo "GPU Driver:             $gpuconf"
-            ;;
-    esac
+    echo "GPU Driver:             $gpuconf"
     echo "Hostname:               $hname"
     if [[ $rootpass == "" ]]; then
         echo "Root account:               Disabled"
@@ -622,7 +793,7 @@ while [[ $menu == 1 ]]; do
             ;;
     esac
     echo
-    echo "------------------------------------------------"
+    echo "----------------------------------------------------------------"
     echo
     choice=$(gum choose "Begin installation" "Cancel installation (power off)" "Exit to shell" "Change locale" "Change partitioning and encryption" "Change packages and drivers" "Change hostname" "Change username and authentication" "Change boot options" --header="Install with these options?")
     case $choice in
@@ -682,6 +853,9 @@ systemctl enable upower
 systemctl enable sddm
 systemctl enable lightdm
 systemctl enable wireplumber
+systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam
+# Update clamav databases
+freshclam
 EOF
 # Create boot entry
 if [[ $uefiboot == 1 ]]; then
@@ -706,14 +880,49 @@ makepkg -si --noconfirm
 #yay -S --noconfirm limine-entry-tool
 EOF
 
-# Install extra packages if selected and enable antivirus
-if [[ $extrapkgs == 1 ]]; then
-    echo "yay -S --noconfirm --needed firefox firefox-i18n-uk firefox-ublock-origin flatpak neofetch screenfetch fastfetch tree htop btop partitionmanager ark thunar konsole dialog exfatprogs f2fs-tools hfsprogs jfsutils ntfs-3g udftools apfsprogs zfs-utils clamav clamtk" >> jdai-usr.sh
-    echo "sudo freshclam" >> jdai-usr.sh
-    echo "sudo systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam" >> jdai-usr.sh
+# Install selected extra packages
+extrapkgs=""
+if [[ $getwinfs == 1 ]]; then
+    extrapkgs="$extrapkgs exfatprogs ntfs-3g ntfsprogs"
 fi
-if [[ $gamer == 1 ]]; then
-    echo "yay -S --noconfirm --needed steam gamescope lutris winboat mesa docker docker-compose$gpupkg" >> jdai-usr.sh
+if [[ $getapplefs == 1 ]]; then
+    extrapkgs="$extrapkgs hfsprogs apfsprogs"
+fi
+if [[ $getzfs == 1 ]]; then
+    extrapkgs="$extrapkgs zfs-utils"
+fi
+if [[ $getf2fs == 1 ]]; then
+    extrapkgs="$extrapkgs f2fs-tools"
+fi
+if [[ $getudf == 1 ]]; then
+    extrapkgs="$extrapkgs udftools"
+fi
+if [[ $getjfs == 1 ]]; then
+    extrapkgs="$extrapkgs jfsutils"
+fi
+if [[ $getsteam == 1 ]]; then
+    extrapkgs="$extrapkgs steam gamescope mesa"
+fi
+if [[ $getlutris == 1 ]]; then
+    extrapkgs="$extrapkgs lutris"
+fi
+if [[ $getwinboat == 1 ]]; then
+    extrapkgs="$extrapkgs winboat-bin docker docker-compose"
+fi
+if [[ $gpudrv == 1 ]]; then
+    extrapkgs="$extrapkgs $gpupkg"
+fi
+if [[ $gettimeshift == 1 ]]; then
+    extrapkgs="$extrapkgs timeshift btrfs-assistant btrfsmaintenance"
+fi
+if [[ $getvpn == 1 ]]; then
+    extrapkgs="$extrapkgs proton-vpn-cli proton-vpn-gtk-app"
+fi
+
+if [[ $extrapkgs != "" ]]; then
+    echo "yay -S --needed --noconfirm$extrapkgs" >> jdai-usr.sh
+fi
+if [[ $extrapkgs == *"docker"* ]]; then
     echo "sudo usermod -aG docker $uname" >> jdai-usr.sh
     echo "sudo systemctl enable docker" >> jdai-usr.sh
 fi
@@ -1036,9 +1245,19 @@ sed -i 's/^# \(%wheel ALL=(ALL:ALL) ALL\)/\1/' /mnt/etc/sudoers
 loop=1
 while [[ $loop == 1 ]]; do
     clear
-    choice=$(gum choose "Reboot now" "Exit to shell" "Clean up and exit" --header="Installation is complete! What would you like to do?")
+    choice=$(gum choose "Reboot now" "Enter the system (as root)" "Enter the system (as your user)" "Exit to shell" "Clean up and exit" --header="Installation is complete! What would you like to do?")
     case $choice in
         "Reboot now")
+            reboot
+            loop=0
+            ;;
+        "Enter the system (as root)")
+            arch-chroot /mnt
+            reboot
+            loop=0
+            ;;
+        "Enter the system (as your user)")
+            arch-chroot /mnt -u $uname
             reboot
             loop=0
             ;;
