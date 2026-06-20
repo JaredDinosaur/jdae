@@ -85,7 +85,7 @@ cd ..
 echo -e '\e[34m'"[INFO]" '\e(B\e[m'"Building image (should take 20-30 minutes)..."
 case $verbose in
     0)
-        sudo mkarchiso -v jdae 2>&1 | grep --line-buffered -E '::|mkarchiso|filesystem on'
+        sudo mkarchiso -v jdae 2>&1 | grep --line-buffered -E '::|mkarchiso|filesystem on /'
         ;;
     1)
         sudo mkarchiso -v jdae

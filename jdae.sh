@@ -20,6 +20,7 @@ setlocale(){
                 ;;
         esac
     done
+    loadkeys $keys
 }
 
 diskpart(){
@@ -34,7 +35,7 @@ diskpart(){
         echo "Recommended minimum disk space: 64GB for VMs, 128GB for real hardware"
         disk=$(gum input --prompt="The disk to install to is /dev/")
         echo
-        echo -e '\e[3m'"WARNING: The contents of this disk will be changed or erased!"'\e(B\e[m'
+        echo -e '\e[3m'"WARNING: The contents of disk /dev/$disk will be changed or erased!"'\e(B\e[m'
         echo -e '\e[3m'"Double check that you have selected the correct disk!"'\e(B\e[m'
         choice=$(gum choose "I understand, continue" "Choose another disk" "Cancel the installation (power off)" --header="Are you sure you want to continue?")
         case $choice in
@@ -167,22 +168,22 @@ pkgs(){
         choice=$(gum choose "Desktop with Plasma (default)" "Desktop with Hyprland" "Desktop with Xfce" "Desktop with LXQt" "Command line" "Minimal" "Help" --header="Choose a set of packages:")
         case $choice in
             "Desktop with Plasma (default)")
-                pkglist="base linux linux-firmware firefox firefox-i18n-uk firefox-ublock-origin flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano kate konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano kate konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
                 profile="Desktop (Plasma)"
                 loop=0
                 ;;
             "Desktop with Hyprland")
-                pkglist="base linux linux-firmware firefox firefox-i18n-uk firefox-ublock-origin flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
                 profile="Desktop (Hyprland)"
                 loop=0
                 ;;
             "Desktop with Xfce")
-                pkglist="base linux linux-firmware firefox firefox-i18n-uk firefox-ublock-origin flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies plymouth discover packagekit packagekit-qt6 vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies gparted plymouth discover packagekit packagekit-qt6 vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
                 profile="Desktop (Xfce)"
                 loop=0
                 ;;
             "Desktop with LXQt")
-                pkglist="base linux linux-firmware firefox firefox-i18n-uk firefox-ublock-origin flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth discover packagekit packagekit-qt6 lxqt vlc iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth discover packagekit packagekit-qt6 lxqt vlc iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
                 profile="Desktop (LXQt)"
                 loop=0
                 ;;
@@ -232,6 +233,8 @@ pkgs(){
         esac
     done
 
+    browser="Firefox"
+    browserpkg="firefox firefox-i18n-uk firefox-ublock-origin"
     getwinfs=0
     getf2fs=0
     getapplefs=0
@@ -241,6 +244,8 @@ pkgs(){
     getsteam=0
     getlutris=0
     getwinboat=0
+    getbottles=0
+    gpudrv=0
     gpuconf="None"
     gettimeshift=0
     getvpn=0
@@ -252,8 +257,8 @@ pkgs(){
         echo -e '\e[3m'"Select an option to change whether to install it."'\e(B\e[m'
         echo -e '\e[3m'"-------------------------------------------------"'\e(B\e[m'
         echo
-
-        echo -e '\e[36m'"[1]" '\e(B\e[m'"Filesystem utilities:"
+        echo -e '\e[36m'"[1]" '\e(B\e[m'"Web browser: $browser"
+        echo -e '\e[36m'"[2]" '\e(B\e[m'"Filesystem utilities:"
         if [[ $getwinfs == 0 ]]; then
             echo -e '\e[35m'"==>" '\e(B\e[m'"Windows filesystems (NTFS and exFAT): No"
         else
@@ -284,8 +289,7 @@ pkgs(){
         else
             echo -e '\e[35m'"==>" '\e(B\e[m'"JFS (IBM filesystem): Yes"
         fi
-        echo
-        echo -e '\e[36m'"[2]" '\e(B\e[m'"Gaming packages:"
+        echo -e '\e[36m'"[3]" '\e(B\e[m'"Gaming packages:"
         if [[ $getsteam == 0 ]]; then
             echo -e '\e[35m'"==>" '\e(B\e[m'"Steam: No"
         else
@@ -301,27 +305,57 @@ pkgs(){
         else
             echo -e '\e[35m'"==>" '\e(B\e[m'"Winboat (run Windows apps on Linux): Yes"
         fi
-        echo
-        echo -e '\e[36m'"[3]" '\e(B\e[m'"GPU Driver: $gpuconf"
-        echo
+        if [[ $getbottles == 0 ]]; then
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Bottles (like Winboat, but more lightweight): No"
+        else
+            echo -e '\e[35m'"==>" '\e(B\e[m'"Bottles (like Winboat, but more lightweight): Yes"
+        fi
+        echo -e '\e[36m'"[4]" '\e(B\e[m'"GPU Driver: $gpuconf"
         if [[ $gettimeshift == 0 ]]; then
-            echo -e '\e[36m'"[4]" '\e(B\e[m'"Timeshift (backup utility): No"
+            echo -e '\e[36m'"[5]" '\e(B\e[m'"Timeshift (backup utility): No"
         else
-            echo -e '\e[36m'"[4]" '\e(B\e[m'"Timeshift (backup utility): Yes"
+            echo -e '\e[36m'"[5]" '\e(B\e[m'"Timeshift (backup utility): Yes"
         fi
-        echo
         if [[ $getvpn == 0 ]]; then
-            echo -e '\e[36m'"[5]" '\e(B\e[m'"Proton VPN: No"
+            echo -e '\e[36m'"[6]" '\e(B\e[m'"Proton VPN: No"
         else
-            echo -e '\e[36m'"[5]" '\e(B\e[m'"Proton VPN: Yes"
+            echo -e '\e[36m'"[6]" '\e(B\e[m'"Proton VPN: Yes"
         fi
-        echo
-        echo
         echo
         echo -e '\e[36m'"[0]" '\e(B\e[m'"Done"
         read -n 1 choice
         case $choice in
             1)
+                clear
+                choice=$(gum choose "Firefox (default)" "Brave" "Zen Browser" "Helium Browser" "Mullvad Browser" "None" --header="Choose a web browser:")
+                case $choice in
+                    "Firefox (default)")
+                        browser="Firefox"
+                        browserpkg="firefox firefox-i18n-uk firefox-ublock-origin"
+                        ;;
+                    "Brave")
+                        browser="Brave"
+                        browserpkg="brave-bin"
+                        ;;
+                    "Zen Browser")
+                        browser="Zen Browser"
+                        browserpkg="zen-browser-bin"
+                        ;;
+                    "Helium Browser")
+                        browser="Helium Browser"
+                        browserpkg="helium-browser-bin"
+                        ;;
+                    "Mullvad Browser")
+                        browser="Mullvad Browser"
+                        browserpkg="mullvad-browser-bin"
+                        ;;
+                    "None")
+                        browser="None"
+                        browserpkg=""
+                        ;;
+                esac
+                ;;
+            2)
                 submenu=1
                 while [[ $submenu == 1 ]]; do
                     clear
@@ -403,7 +437,7 @@ pkgs(){
                     esac
                 done
                 ;;
-            2)
+            3)
                 submenu=1
                 while [[ $submenu == 1 ]]; do
                     clear
@@ -424,8 +458,13 @@ pkgs(){
                     else
                         echo -e '\e[36m'"[3]" '\e(B\e[m'"Winboat (run Windows apps on Linux): Yes"
                     fi
-                    echo -e '\e[36m'"[4]" '\e(B\e[m'"Yes to all"
-                    echo -e '\e[36m'"[5]" '\e(B\e[m'"No to all"
+                    if [[ $getbottles == 0 ]]; then
+                        echo -e '\e[36m'"[4]" '\e(B\e[m'"Bottles (like Winboat, but more lightweight): No"
+                    else
+                        echo -e '\e[36m'"[4]" '\e(B\e[m'"Bottles (like Winboat, but more lightweight): Yes"
+                    fi
+                    echo -e '\e[36m'"[5]" '\e(B\e[m'"Yes to all"
+                    echo -e '\e[36m'"[6]" '\e(B\e[m'"No to all"
                     echo
                     echo -e '\e[36m'"[0]" '\e(B\e[m'"Go back"
                     read -n 1 choice
@@ -440,14 +479,19 @@ pkgs(){
                             getwinboat=$((1 - getwinboat))
                             ;;
                         4)
+                            getbottles=$((1 - getbottles))
+                            ;;
+                        5)
                             getsteam=1
                             getlutris=1
                             getwinboat=1
+                            getbottles=1
                             ;;
-                        5)
+                        6)
                             getsteam=0
                             getlutris=0
                             getwinboat=0
+                            getbottles=0
                             ;;
                         0)
                             submenu=0
@@ -455,7 +499,7 @@ pkgs(){
                     esac
                 done
                 ;;
-            3)
+            4)
                 submenu=1
                 while [[ $submenu == 1 ]]; do
                     clear
@@ -499,10 +543,10 @@ pkgs(){
                     esac
                 done
                 ;;
-            4)
+            5)
                 gettimeshift=$((1 - gettimeshift))
                 ;;
-            5)
+            6)
                 getvpn=$((1 - getvpn))
                 ;;
             0)
@@ -882,6 +926,10 @@ EOF
 
 # Install selected extra packages
 extrapkgs=""
+extraflat=""
+if [[ $browserpkg != "" ]]; then
+    extrapkgs="$extrapkgs $browserpkg"
+fi
 if [[ $getwinfs == 1 ]]; then
     extrapkgs="$extrapkgs exfatprogs ntfs-3g ntfsprogs"
 fi
@@ -909,6 +957,9 @@ fi
 if [[ $getwinboat == 1 ]]; then
     extrapkgs="$extrapkgs winboat-bin docker docker-compose"
 fi
+if [[ $getbottles == 1 ]]; then
+    extraflat="$extraflat com.usebottles.bottles"
+fi
 if [[ $gpudrv == 1 ]]; then
     extrapkgs="$extrapkgs $gpupkg"
 fi
@@ -916,11 +967,13 @@ if [[ $gettimeshift == 1 ]]; then
     extrapkgs="$extrapkgs timeshift btrfs-assistant btrfsmaintenance"
 fi
 if [[ $getvpn == 1 ]]; then
-    extrapkgs="$extrapkgs proton-vpn-cli proton-vpn-gtk-app"
+    extraflat="$extraflat com.protonvpn.www"
 fi
-
 if [[ $extrapkgs != "" ]]; then
     echo "yay -S --needed --noconfirm$extrapkgs" >> jdai-usr.sh
+fi
+if [[ $extraflat != "" ]]; then
+    echo "flatpak install$extraflat -y" >> jdai-usr.sh
 fi
 if [[ $extrapkgs == *"docker"* ]]; then
     echo "sudo usermod -aG docker $uname" >> jdai-usr.sh
@@ -1257,7 +1310,7 @@ while [[ $loop == 1 ]]; do
             loop=0
             ;;
         "Enter the system (as your user)")
-            arch-chroot /mnt -u $uname
+            arch-chroot -u $uname /mnt
             reboot
             loop=0
             ;;
