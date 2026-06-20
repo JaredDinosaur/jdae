@@ -42,6 +42,8 @@ Warpinator | Easy network file sharing
 Waydroid | Run Android apps natively
 Modrinth | Minecraft mod manager
 
+and many more...
+
 ## Terminal commands
 
 ### Software management
@@ -115,3 +117,11 @@ Command | Description
 `sudo systemctl start <service>` | Start a system service
 `sudo systemctl enable <service>` | Enable a system service
 `sudo systemctl enable --now <service>` | Enable and start a system service
+
+## Other resources
+
+Google is your friend! It's okay to look things up if you don't know what to do.
+
+For most questions you may have for a program, `man <program>` or the [Arch wiki](https://wiki.archlinux.org/title/Main_page) will have the answer.
+
+It is not recommended to rely on AI for support as it can often make mistakes, which could potentially lead to you breaking your system.
