@@ -53,7 +53,7 @@ Both can be managed seamlessly in the Discover app.
 
 Some programs are available as both a regular and Flatpak package.
 
-Regular packages have short names, whereas Flatpak names are formatted like urls.
+Regular packages have short names, whereas Flatpak names are formatted like URLs.
 
 For example, to install Discord:
 
