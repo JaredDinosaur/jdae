@@ -4,6 +4,9 @@ A modified version of the Arch Linux live environment which runs a custom instal
 
 The .sh files in the repo are for building the system yourself! Precompiled .iso downloads can be found under releases.
 
+## Support for new users
+A guide to helpful programs and commands can be found [here](https://github.com/JaredDinosaur/jdae/blob/main/SUPPORT.md).
+
 ## Known issues:
 Issues under Miscallaneous are bugs in other programs which cannot be fixed within the installer.
 ### Installer-related:
