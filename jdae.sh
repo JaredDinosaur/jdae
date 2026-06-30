@@ -1,6 +1,33 @@
 #!/bin/bash
-set -euo pipefail
 setlocale(){
+    loop=1
+    while [[ $loop == 1 ]]; do
+        clear
+        choice=$(gum choose "Tiny" "Small (HD default)" "Regular" "Large (4K default)" "Huge" "Colossal" "Done" --header="Select a font size, then select Done to continue: ")
+        case $choice in
+            "Tiny")
+                setfont drdos8x8
+                ;;
+            "Small (HD default)")
+                setfont
+                ;;
+            "Regular")
+                setfont ter-124b
+                ;;
+            "Large (4K default)")
+                setfont ter-132b
+                ;;
+            "Huge")
+                setfont ter-124b -d
+                ;;
+            "Colossal")
+                setfont ter-132b -d
+                ;;
+            "Done")
+                loop=0
+                ;;
+        esac
+    done
     loop=1
     while [[ $loop == 1 ]]; do
         clear
@@ -25,30 +52,48 @@ setlocale(){
 
 diskpart(){
     loop=1
+    clear
     while [[ $loop == 1 ]]; do
-        clear
         echo "Available disks:"
         echo
         # List available disks
-        hwinfo --disk --short
+        lsblk -d -o NAME,SIZE,LABEL
         echo
         echo "Recommended minimum disk space: 64GB for VMs, 128GB for real hardware"
-        disk=$(gum input --prompt="The disk to install to is /dev/")
-        echo
-        echo -e '\e[3m'"WARNING: The contents of disk /dev/$disk will be changed or erased!"'\e(B\e[m'
-        echo -e '\e[3m'"Double check that you have selected the correct disk!"'\e(B\e[m'
-        choice=$(gum choose "I understand, continue" "Choose another disk" "Cancel the installation (power off)" --header="Are you sure you want to continue?")
-        case $choice in
-            "I understand, continue")
-                loop=0
-                ;;
-            "Cancel the installation (power off)")
-                poweroff
-                exit 1
-                ;;
-            *)
-                ;;
-        esac
+        disk=$(gum input --prompt="Enter the name of the disk to install to (e.g. sda or nvme0n1): ")
+
+        # Check that disk exists and is writable
+        if ! [[ -b /dev/$disk ]]; then
+            clear
+            echo
+            echo "Disk $disk does not exist!"
+            echo "Make sure you enter the name of the disk, not the label!"
+            echo
+        else
+            if ! [[ -w /dev/$disk ]]; then
+                echo
+                echo "Disk $disk is not writable!"
+                echo "Check that the disk is not in use!"
+                echo
+            else
+                echo
+                echo -e '\e[3m'"WARNING: The contents of disk $disk will be changed or erased!"'\e(B\e[m'
+                echo -e '\e[3m'"Double check that you have selected the correct disk!"'\e(B\e[m'
+                choice=$(gum choose "I understand, continue" "Choose another disk" "Cancel the installation (power off)" --header="Are you sure you want to continue?")
+                case $choice in
+                    "I understand, continue")
+                        loop=0
+                        ;;
+                    "Cancel the installation (power off)")
+                        poweroff
+                        exit 1
+                        ;;
+                    *)
+                        clear
+                        ;;
+                esac
+            fi
+        fi
     done
     loop=1
     while [[ $loop == 1 ]]; do
@@ -168,7 +213,7 @@ pkgs(){
         choice=$(gum choose "Desktop with Plasma (default)" "Desktop with Hyprland" "Desktop with Xfce" "Desktop with LXQt" "Command line" "Minimal" "Help" --header="Choose a set of packages:")
         case $choice in
             "Desktop with Plasma (default)")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano kate konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano kate konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk power-profiles-daemon"
                 profile="Desktop (Plasma)"
                 loop=0
                 ;;
@@ -255,6 +300,7 @@ pkgs(){
         clear
         echo -e '\e[3m'"--------------Extra packages menu----------------"'\e(B\e[m'
         echo -e '\e[3m'"Select an option to change whether to install it."'\e(B\e[m'
+        echo -e '\e[3m'"It's strongly recommended to select a GPU driver."'\e(B\e[m'
         echo -e '\e[3m'"-------------------------------------------------"'\e(B\e[m'
         echo
         echo -e '\e[36m'"[1]" '\e(B\e[m'"Web browser: $browser"
@@ -305,21 +351,11 @@ pkgs(){
         else
             echo -e '\e[35m'"==>" '\e(B\e[m'"Winboat (run Windows apps on Linux): Yes"
         fi
-        if [[ $getbottles == 0 ]]; then
-            echo -e '\e[35m'"==>" '\e(B\e[m'"Bottles (like Winboat, but more lightweight): No"
-        else
-            echo -e '\e[35m'"==>" '\e(B\e[m'"Bottles (like Winboat, but more lightweight): Yes"
-        fi
         echo -e '\e[36m'"[4]" '\e(B\e[m'"GPU Driver: $gpuconf"
         if [[ $gettimeshift == 0 ]]; then
             echo -e '\e[36m'"[5]" '\e(B\e[m'"Timeshift (backup utility): No"
         else
             echo -e '\e[36m'"[5]" '\e(B\e[m'"Timeshift (backup utility): Yes"
-        fi
-        if [[ $getvpn == 0 ]]; then
-            echo -e '\e[36m'"[6]" '\e(B\e[m'"Proton VPN: No"
-        else
-            echo -e '\e[36m'"[6]" '\e(B\e[m'"Proton VPN: Yes"
         fi
         echo
         echo -e '\e[36m'"[0]" '\e(B\e[m'"Done"
@@ -339,7 +375,7 @@ pkgs(){
                         ;;
                     "Zen Browser")
                         browser="Zen Browser"
-                        browserpkg="zen-browser-bin"
+                        browserpkg="zen-browser-bin firefox-ublock-origin"
                         ;;
                     "Helium Browser")
                         browser="Helium Browser"
@@ -347,7 +383,7 @@ pkgs(){
                         ;;
                     "Mullvad Browser")
                         browser="Mullvad Browser"
-                        browserpkg="mullvad-browser-bin"
+                        browserpkg="mullvad-browser-bin firefox-ublock-origin"
                         ;;
                     "None")
                         browser="None"
@@ -458,13 +494,8 @@ pkgs(){
                     else
                         echo -e '\e[36m'"[3]" '\e(B\e[m'"Winboat (run Windows apps on Linux): Yes"
                     fi
-                    if [[ $getbottles == 0 ]]; then
-                        echo -e '\e[36m'"[4]" '\e(B\e[m'"Bottles (like Winboat, but more lightweight): No"
-                    else
-                        echo -e '\e[36m'"[4]" '\e(B\e[m'"Bottles (like Winboat, but more lightweight): Yes"
-                    fi
-                    echo -e '\e[36m'"[5]" '\e(B\e[m'"Yes to all"
-                    echo -e '\e[36m'"[6]" '\e(B\e[m'"No to all"
+                    echo -e '\e[36m'"[4]" '\e(B\e[m'"Yes to all"
+                    echo -e '\e[36m'"[5]" '\e(B\e[m'"No to all"
                     echo
                     echo -e '\e[36m'"[0]" '\e(B\e[m'"Go back"
                     read -n 1 choice
@@ -479,19 +510,14 @@ pkgs(){
                             getwinboat=$((1 - getwinboat))
                             ;;
                         4)
-                            getbottles=$((1 - getbottles))
-                            ;;
-                        5)
                             getsteam=1
                             getlutris=1
                             getwinboat=1
-                            getbottles=1
                             ;;
-                        6)
+                        5)
                             getsteam=0
                             getlutris=0
                             getwinboat=0
-                            getbottles=0
                             ;;
                         0)
                             submenu=0
@@ -545,9 +571,6 @@ pkgs(){
                 ;;
             5)
                 gettimeshift=$((1 - gettimeshift))
-                ;;
-            6)
-                getvpn=$((1 - getvpn))
                 ;;
             0)
                 loop=0
@@ -665,6 +688,7 @@ bootent(){
     loop=1
     while [[ $loop == 1 ]]; do
         clear
+        echo -e '\e[3m'"If you don't know what this means, just choose Yes."'\e(B\e[m'
         echo -e '\e[3m'"This machine is currently booted in $bootmode mode."'\e(B\e[m'
         choice=$(gum choose "Yes" "No" --header="Would you like to make your system bootable in both BIOS and UEFI mode?")
         case $choice in
@@ -693,10 +717,8 @@ bootent(){
 intchk(){
     echo "Checking internet connection..."
     # Attempt to sync databases
-    set +e
     pacman -Syy &>/dev/null
     connect=$?
-    set -e
     if [[ $connect == 0 ]]; then
         echo "Connection test successful."
         quit=0
@@ -710,20 +732,39 @@ intchk(){
             case $choice in
                 "List available wireless networks")
                     clear
-                    # List available wireless networks
-                    iface=$(iw dev | awk '$1=="Interface"{print $2; exit}')
-                    if [[ $iface == "" ]]; then
-                        echo "No wireless devices found!"
-                        quit=1
-                        loop=0
-                    else
-                        iwctl station "$iface" get-networks
-                        ssid=$(gum input --prompt="Enter the name of the network you wish to connect to: ")
-                        # Connect to the selected network
-                        iwctl station "$iface" connect "$ssid"
-                        quit=2
-                        loop=0
-                    fi
+                    iwlist=1
+                    while [[ iwlist == 1 ]]; do
+                        # List available wireless networks
+                        iface=$(iw dev | awk '$1=="Interface"{print $2; exit}')
+                        if [[ $iface == "" ]]; then
+                            echo "No wireless devices found!"
+                            quit=1
+                            loop=0
+                            iwlist=0
+                        else
+                            iwctl station "$iface" get-networks
+                            ssid=$(gum input --prompt="Enter the name of the network you wish to connect to: ")
+                            # Connect to the selected network
+                            iwctl station "$iface" connect "$ssid"
+                            case $? in
+                                0)
+                                    echo "Connected successfully. The script will now restart."
+                                    sleep 2
+                                    iwlist=0
+                                    logout
+                                    ;;
+                                *)
+                                    clear
+                                    echo
+                                    echo "Could not connect to $ssid"
+                                    echo "Please check that the network name and password were typed correctly."
+                                    echo
+                                    ;;
+                            esac
+                            quit=2
+                            loop=0
+                        fi
+                    done
                     ;;
                 "Cancel installation")
                     quit=1
@@ -741,6 +782,7 @@ intchk(){
 }
 
 clear
+setlocale
 # Check boot mode
 if [[ -d "/sys/firmware/efi" ]]; then
     echo "The system is booted in UEFI mode."
@@ -765,13 +807,14 @@ while [[ $quit == 2 ]]; do
         exit 2
     fi
 done
-# Edit pacman config and install hwinfo
+# Edit pacman config
 sed -i "s/#Color/Color/" /etc/pacman.conf
 sed -i "s/ParallelDownloads = 5/ParallelDownloads = 1/" /etc/pacman.conf
 sed -i "s/#NoProgressBar/ILoveCandy/" /etc/pacman.conf
 
+set -euo pipefail
+
 # Get options
-setlocale
 diskpart
 pkgs
 sethostname
@@ -957,23 +1000,14 @@ fi
 if [[ $getwinboat == 1 ]]; then
     extrapkgs="$extrapkgs winboat-bin docker docker-compose"
 fi
-if [[ $getbottles == 1 ]]; then
-    extraflat="$extraflat com.usebottles.bottles"
-fi
 if [[ $gpudrv == 1 ]]; then
     extrapkgs="$extrapkgs $gpupkg"
 fi
 if [[ $gettimeshift == 1 ]]; then
     extrapkgs="$extrapkgs timeshift btrfs-assistant btrfsmaintenance"
 fi
-if [[ $getvpn == 1 ]]; then
-    extraflat="$extraflat com.protonvpn.www"
-fi
 if [[ $extrapkgs != "" ]]; then
     echo "yay -S --needed --noconfirm$extrapkgs" >> jdai-usr.sh
-fi
-if [[ $extraflat != "" ]]; then
-    echo "flatpak install$extraflat -y" >> jdai-usr.sh
 fi
 if [[ $extrapkgs == *"docker"* ]]; then
     echo "sudo usermod -aG docker $uname" >> jdai-usr.sh
@@ -989,12 +1023,14 @@ mv kde_settings.conf ..
 cp ./* ~/.config
 mv ../kde_settings.conf .
 sudo cp kde_settings.conf /etc/sddm.conf.d
+sudo mv /etc/sddm.conf.d /etc/sddm.conf
+yay -R --noconfirm plasma-bigscreen
 EOF
 fi
 # Install hyprland configuration files
 if [[ $profile == "Desktop (Hyprland)" ]]; then
     cat >> jdai-usr.sh << "EOF"
-cd .." >> jdai-usr.sh
+cd ..
 git clone https://github.com/JaredDinosaur/hyprconf
 cd hyprconf
 mkdir ~/.config/hypr

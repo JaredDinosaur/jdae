@@ -35,6 +35,14 @@ sed -i "s/#NoProgressBar/ILoveCandy/" pacman.conf
 sed -i "s/iso_name=\"archlinux\"/iso_name=\"jdae\"/" profiledef.sh
 sed -i "s/iso_label=\"ARCH/iso_label=\"JDAE/" profiledef.sh
 sed -i "s/iso_publisher=\"Arch Linux <https:\/\/archlinux.org>\"/iso_publisher=\"Jared Dinosaur <https:\/\/github.com\/JaredDinosaur>\"/" profiledef.sh
+sed -i "s/timeout 15/timeout 10/" efiboot/loader/loader.conf
+sed -i "s/beep on/beep off/" efiboot/loader/loader.conf
+sed -i "s/title    Arch Linux install medium (%ARCH%, UEFI)/title    JDAE (normal mode)/" efiboot/loader/entries/01-archiso-linux.conf
+sed -i "s/title    Arch Linux install medium (%ARCH%, UEFI) with speech/title    JDAE (accessibility mode)/" efiboot/loader/entries/02-archiso-speech-linux.conf
+sed -i "s/timeout=15/timeout=10/" grub/grub.cfg
+sed -i "s/menuentry \"Arch Linux install medium (%ARCH%, ${archiso_platform})\"/menuentry \"JDAE (normal mode)\"/" grub/grub.cfg
+sed -i "s/menuentry \"Arch Linux install medium with speakup screen reader (%ARCH%, ${archiso_platform})\"/menuentry \"JDAE (accessibility mode)\"/" grub/grub.cfg
+
 install -Dm755 ../../jdae.sh airootfs/usr/local/bin/jdae.sh
 cat > airootfs/root/.zlogin << "EOF"
 /bin/bash exit.sh
