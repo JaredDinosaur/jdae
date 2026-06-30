@@ -29,8 +29,9 @@ OBS Studio | Broadcast and record videos
 Discord | Voice and text chat
 Audacity | Edit and record audio
 Minecraft Bedrock Launcher | Play Minecraft: Bedrock Edition
-LibreOffice | Office suite
 Heroic | Play Epic, GOG and Amazon games
+LibreOffice | Office suite
+Proton VPN | Free VPN
 Kdenlive | Video editor
 Prism Launcher | Minecraft mod and installation manager
 Whatsie | WhatsApp client
