@@ -733,7 +733,7 @@ intchk(){
                 "List available wireless networks")
                     clear
                     iwlist=1
-                    while [[ iwlist == 1 ]]; do
+                    while [[ $iwlist == 1 ]]; do
                         # List available wireless networks
                         iface=$(iw dev | awk '$1=="Interface"{print $2; exit}')
                         if [[ $iface == "" ]]; then
