@@ -14,6 +14,7 @@ Issues under Miscallaneous are bugs in other programs which cannot be fixed with
 - XFS can rarely fail to format on unencrypted, non-empty disks.
 - The internet connection test may sometimes fail when a connection is present.
 - Selecting "Other" for GPU drivers can install the default drivers instead (usually Nvidia).
+- Inputs can crash if the screen size is too small. If this happens, turn down the font size.
 ### Miscallaneous:
 - Winboat does not recognise Docker until `sudo systemctl start docker` is run.
 - Packages may fail to install due to a held lock. This can be fixed by running `rm -f ~/.gnupg/public-keys.d/pubring.db.lock`.
