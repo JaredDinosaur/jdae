@@ -1,30 +1,44 @@
 #!/bin/bash
 setlocale(){
     loop=1
+    clear
     while [[ $loop == 1 ]]; do
-        clear
         choice=$(gum choose "Tiny" "Small (HD default)" "Regular" "Large (4K default)" "Huge" "Colossal" "Done" --header="Select a font size, then select Done to continue: ")
         case $choice in
             "Tiny")
                 setfont drdos8x8
+                clear
                 ;;
             "Small (HD default)")
                 setfont
+                clear
                 ;;
             "Regular")
                 setfont ter-124b
+                clear
                 ;;
             "Large (4K default)")
                 setfont ter-132b
+                clear
                 ;;
             "Huge")
                 setfont ter-124b -d
+                clear
                 ;;
             "Colossal")
                 setfont ter-132b -d
+                clear
                 ;;
             "Done")
-                loop=0
+                if (( $(tput cols) < 90 )); then
+                    clear
+                    echo
+                    echo "The screen must be at least 90 characters wide!"
+                    echo "Please choose a smaller font!"
+                    echo
+                else
+                    loop=0
+                fi
                 ;;
         esac
     done
@@ -57,27 +71,28 @@ diskpart(){
         echo "Available disks:"
         echo
         # List available disks
-        lsblk -d -o NAME,SIZE,LABEL
+        #lsblk -d -o NAME,SIZE,LABEL
+        hwinfo --disk --short
         echo
         echo "Recommended minimum disk space: 64GB for VMs, 128GB for real hardware"
-        disk=$(gum input --prompt="Enter the name of the disk to install to (e.g. sda or nvme0n1): ")
+        disk=$(gum input --prompt="The disk to install to is /dev/___: ")
 
         # Check that disk exists and is writable
         if ! [[ -b /dev/$disk ]]; then
             clear
             echo
-            echo "Disk $disk does not exist!"
-            echo "Make sure you enter the name of the disk, not the label!"
+            echo "Disk /dev/$disk does not exist!"
             echo
         else
             if ! [[ -w /dev/$disk ]]; then
+                clear
                 echo
-                echo "Disk $disk is not writable!"
+                echo "Disk /dev/$disk is not writable!"
                 echo "Check that the disk is not in use!"
                 echo
             else
                 echo
-                echo -e '\e[3m'"WARNING: The contents of disk $disk will be changed or erased!"'\e(B\e[m'
+                echo -e '\e[3m'"WARNING: The contents of disk /dev/$disk will be changed or erased!"'\e(B\e[m'
                 echo -e '\e[3m'"Double check that you have selected the correct disk!"'\e(B\e[m'
                 choice=$(gum choose "I understand, continue" "Choose another disk" "Cancel the installation (power off)" --header="Are you sure you want to continue?")
                 case $choice in
@@ -1080,7 +1095,7 @@ case $manpart in
             swap="${disk}p${swapno}"
         fi
         # Get system RAM amount
-        ram=$(grep MemTotal /proc/meminfo | awk '{print int($2/1024)}')
+        ram=$(grep MemTotal /proc/meminfo | awk '{print int($2/512)}')
         # Partition disk:
         # /boot  | 1GB
         # [SWAP] | Same as RAM
@@ -1125,26 +1140,69 @@ EOF
             # Open TUI partition manager
             cfdisk /dev/$disk
             clear
-            read -p "Which partition number should be used for root? " rootno
-            clear
-            read -p "Which partition number should be used for boot? (usually 1) " bootno
-            clear
-            read -p "Which partition number should be used for swap? " swapno
+            loop=1
+            while [[ $loop == 1 ]]; do
+                rootno=$(gum input --prompt="Which partition number should be used for root? ")
+                if [[ "$disk" == *"d"* ]]; then
+                    root="${disk}${rootno}"
+                else
+                    root="${disk}p${rootno}"
+                fi
+                if ! [[ -e "/dev/$root" ]]; then
+                    clear
+                    echo
+                    echo "Partition /dev/$root does not exist!"
+                    echo
+                else
+                    loop=0
+                fi
+            done
             clear
             loop=1
             while [[ $loop == 1 ]]; do
+                bootno=$(gum input --prompt="Which partition number should be used for boot? (usually 1) ")
+                if [[ "$disk" == *"d"* ]]; then
+                    boot="${disk}${bootno}"
+                else
+                    boot="${disk}p${bootno}"
+                fi
+                if ! [[ -e "/dev/$boot" ]]; then
+                    clear
+                    echo
+                    echo "Partition /dev/$boot does not exist!"
+                    echo
+                else
+                    loop=0
+                fi
+            done
+            clear
+            loop=1
+            while [[ $loop == 1 ]]; do
+                swapno=$(gum input --prompt="Which partition number should be used for swap? ")
+                if [[ "$disk" == *"d"* ]]; then
+                    swap="${disk}${swapno}"
+                else
+                    swap="${disk}p${swapno}"
+                fi
+                if ! [[ -e "/dev/$swap" ]]; then
+                    clear
+                    echo
+                    echo "Partition /dev/$swap does not exist!"
+                    echo
+                else
+                    loop=0
+                fi
+            done
+            loop=1
+            while [[ $loop == 1 ]]; do
                 clear
-                echo -e '\e[3m'"Format the boot partition? This will remove all data on the partition!"'\e(B\e[m'
-                echo
-                echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes, format it"
-                echo -e '\e[36m'"[N]" '\e(B\e[m'"No, keep existing data (may cause issues)"
-                read -n 1 choice
+                choice=$(gum choose "Yes, format it" "No, keep existing data" --header="Format the boot partition? This will remove all data on the partition!")
                 case $choice in
-                    y|Y)
+                    "Yes, format it")
                         formboot=1
                         loop=0
                         ;;
-                    n|N)
+                    "No, keep existing data")
                         formboot=0
                         loop=0
                         ;;
@@ -1152,16 +1210,6 @@ EOF
                         ;;
                 esac
             done
-            # Handles different partition names (sda/vda vs nvme/mmcblk)
-            if [[ "$disk" == *"d"* ]]; then
-                root="${disk}${rootno}"
-                boot="${disk}${bootno}"
-                swap="${disk}${swapno}"
-            else
-                root="${disk}p${rootno}"
-                boot="${disk}p${bootno}"
-                swap="${disk}p${swapno}"
-            fi
             loop=1
             while [[ $loop == 1 ]]; do
                 clear
@@ -1177,21 +1225,16 @@ EOF
                         ;;
                 esac
                 echo
-                echo -e '\e[3m'"Are you sure these options are correct?"'\e(B\e[m'
-                echo
-                echo -e '\e[36m'"[Y]" '\e(B\e[m'"Yes, continue"
-                echo -e '\e[36m'"[N]" '\e(B\e[m'"No, change my options"
-                echo -e '\e[36m'"[Q]" '\e(B\e[m'"Cancel installation"
-                read -n 1 choice
+                choice=$(gum choose "Yes, continue" "No, change my options" "Cancel installation" --header="Are you sure these options are correct?")
                 case $choice in
-                    y|Y)
+                    "Yes, continue")
                         menu=0
                         loop=0
                         ;;
-                    n|N)
+                    "No, change my options")
                         loop=0
                         ;;
-                    q|Q)
+                    "Cancel installation")
                         exit 1
                         ;;
                     *)
