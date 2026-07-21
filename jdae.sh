@@ -91,8 +91,16 @@ diskpart(){
                 echo "Check that the disk is not in use!"
                 echo
             else
+                disksize=$(blockdev --getsize64 /dev/$disk)
+                if (( $disksize < $mindisk )); then
+                    echo
+                    echo -e '\e[31m'"WARNING: This disk is too small for your selected set of packages!"'\e(B\e[m'
+                    echo -e '\e[31m'"The minimum recommended disk size for your set of packages is ${mingb}GB!"
+                    echo -e '\e[31m'"It is very likely that you will encounter errors during installation!"
+                    echo -e '\e[31m'"Choose another set of packages if you cannot use another disk!"
+                fi
                 echo
-                echo -e '\e[3m'"WARNING: The contents of disk /dev/$disk will be changed or erased!"'\e(B\e[m'
+                echo -e '\e[3m'"The contents of disk /dev/$disk will be changed or erased!"'\e(B\e[m'
                 echo -e '\e[3m'"Double check that you have selected the correct disk!"'\e(B\e[m'
                 choice=$(gum choose "I understand, continue" "Choose another disk" "Cancel the installation (power off)" --header="Are you sure you want to continue?")
                 case $choice in
@@ -228,27 +236,27 @@ pkgs(){
         choice=$(gum choose "Desktop with Plasma (default)" "Desktop with Hyprland" "Desktop with Xfce" "Desktop with LXQt" "Command line" "Minimal" "Help" --header="Choose a set of packages:")
         case $choice in
             "Desktop with Plasma (default)")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano kate konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk power-profiles-daemon"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk power-profiles-daemon man sl"
                 profile="Desktop (Plasma)"
                 loop=0
                 ;;
             "Desktop with Hyprland")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man sl"
                 profile="Desktop (Hyprland)"
                 loop=0
                 ;;
             "Desktop with Xfce")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies gparted plymouth discover packagekit packagekit-qt6 vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies gparted plymouth thunar discover packagekit packagekit-qt6 vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man sl"
                 profile="Desktop (Xfce)"
                 loop=0
                 ;;
             "Desktop with LXQt")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth discover packagekit packagekit-qt6 lxqt vlc iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar discover packagekit packagekit-qt6 lxqt vlc iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man sl"
                 profile="Desktop (LXQt)"
                 loop=0
                 ;;
             "Command line")
-                pkglist="base linux linux-firmware screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav"
+                pkglist="base linux linux-firmware screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav man sl"
                 profile="Command line"
                 loop=0
                 ;;
@@ -292,6 +300,27 @@ pkgs(){
                 ;;
         esac
     done
+
+    clear
+    echo "Calculating the minimum required disk space..."
+
+    expkglist=$(
+        for pkg in $pkglist; do
+            if pacman -Sgq "$pkg" >/dev/null 2>&1; then
+                pacman -Sgq "$pkg"
+            else
+                printf '%s\n' "$pkg"
+            fi
+        done | sort -u | xargs
+    )
+
+    set +e
+    dlsize=$(pacman -Si $expkglist | awk '/Download Size/ {sum += $4 * ($5 == "MiB" ? 1024*1024 : $5 == "KiB" ? 1024 : 1)} END {print int(sum)}')
+    insize=$(pacman -Si $expkglist | awk '/Installed Size/ {sum += $4 * ($5 == "MiB" ? 1024*1024 : $5 == "KiB" ? 1024 : 1)} END {print int(sum)}')
+    ram=$(grep MemTotal /proc/meminfo | awk '{print $2 * 1024}')
+    mindisk=$((dlsize+insize+ram+9487198679))
+    mingb=$(awk -v num="$mindisk" 'BEGIN { print int((num / (1024^3)) + 0.5) }')
+    set -e
 
     browser="Firefox"
     browserpkg="firefox firefox-i18n-uk firefox-ublock-origin"
@@ -830,8 +859,8 @@ sed -i "s/#NoProgressBar/ILoveCandy/" /etc/pacman.conf
 set -euo pipefail
 
 # Get options
-diskpart
 pkgs
+diskpart
 sethostname
 user
 bootent
