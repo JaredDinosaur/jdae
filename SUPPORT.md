@@ -25,7 +25,7 @@ Check if device encryption or BitLocker is enabled:
 Windows edition | How to check
 --- | ---
 Windows 8/8.1/10/11 Pro, Education or Enterprise | Control Panel > System and Security > Manage BitLocker
-Windows 10/11 Home | Privacy and Security > Device Encryption
+Windows 10/11 Home | Settings > Privacy and Security > Device Encryption
 Other | No checking is needed, automatic device encryption does not exist
 
 **If device encryption or BitLocker is enabled, either disable it or ensure you know the recovery key (i.e. by writing it down).**
