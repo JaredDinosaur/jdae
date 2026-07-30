@@ -1,5 +1,51 @@
 # Support for new users
 
+## Dual booting
+
+**If you are planning to only run one operating system on your machine, you may skip this section.**
+
+### Disk Preparation
+Ensure you have an empty disk to install Linux on.
+
+**It is not recommended to dual boot Linux and another operating system on the same disk!**
+
+This is because you will have less disk space and the different systems can interfere with each other.
+
+If you have no other choice, make sure to create free space on your disk by shrinking your current system.
+
+You can do this in Windows by right-clicking on the Windows icon and selecting Disk Management.
+
+### Encryption (prevent Windows from bricking itself)
+If you are not dualbooting alongside Windows, this section may be skipped.
+
+Some Windows systems can activate device encryption or BitLocker. This asks for a key when Secure Boot is disabled, and you may not know the key.
+
+Check if device encryption or BitLocker is enabled:
+
+Windows edition | How to check
+--- | ---
+Windows 8/8.1/10/11 Pro, Education or Enterprise | Control Panel > System and Security > Manage BitLocker
+Windows 10/11 Home | Privacy and Security > Device Encryption
+Other | No checking is needed, automatic device encryption does not exist
+
+**If device encryption or BitLocker is enabled, either disable it or ensure you know the recovery key (i.e. by writing it down).**
+
+### Secure Boot
+Some systems have Secure Boot enabled, which makes it difficult for most Linux environments to boot.
+
+In your BIOS/UEFI settings, check whether Secure Boot is enabled.
+
+If it is enabled, you must disable it or configure it to accept JDAE.
+
+### Boot entry detection
+If you choose to show the boot menu, you may want to add other systems you have installed (such as Windows).
+
+To do this, run the following commands in the terminal:
+
+`yay -S --needed --noconfirm limine-entry-tool` - Install the boot entry detector. This should take less than five minutes.
+
+`sudo limine-scan` - Run the boot entry detector. This finds other installed systems and asks which one to add to the boot menu.
+
 ## Apps
 
 ### Preinstalled
