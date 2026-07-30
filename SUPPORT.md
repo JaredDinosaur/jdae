@@ -2,7 +2,7 @@
 
 ## Dual booting
 
-**If you are planning to only run one operating system on your machine, you may skip this section.**
+**If you are planning to only run one operating system on your machine, you may [skip this section](https://github.com/JaredDinosaur/jdae/blob/main/SUPPORT.md#apps).**
 
 ### Disk Preparation
 Ensure you have an empty disk to install Linux on.
