@@ -167,6 +167,16 @@ Command | Description
 `sudo systemctl enable <service>` | Enable a system service
 `sudo systemctl enable --now <service>` | Enable and start a system service
 
+## Terminal keyboard shortcuts
+
+Shortcut | Description
+--- | ---
+Ctrl + C | Stop the current running process (cancel a command)
+Ctrl + I | Command completion, the same as pressing Tab
+Ctrl + L | Clear the screen, the same as running `clear`
+Ctrl + R | Search through previously run commands
+Ctrl + Z | Place the current running process in the background
+
 ## Other resources
 
 Google is your friend! It's okay to look things up if you don't know what to do.
