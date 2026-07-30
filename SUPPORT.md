@@ -15,6 +15,8 @@ If you have no other choice, make sure to create free space on your disk by shri
 
 You can do this in Windows by right-clicking on the Windows icon and selecting Disk Management.
 
+During the installation, you will have to select Manual configuration for your partitioning method if you are dualbooting on a single disk.
+
 ### Encryption (prevent Windows from bricking itself)
 If you are not dualbooting alongside Windows, this section may be skipped.
 
