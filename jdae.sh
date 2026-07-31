@@ -95,7 +95,7 @@ diskpart(){
                 if (( $disksize < $mindisk )); then
                     echo
                     echo -e '\e[31m'"WARNING: This disk is too small for your selected set of packages!"'\e(B\e[m'
-                    echo -e '\e[31m'"The minimum recommended disk size for your set of packages is ${mingb}GB!"
+                    echo -e '\e[31m'"The minimum required disk size for your set of packages is ${mingb}GB!"
                     echo -e '\e[31m'"It is very likely that you will encounter errors during installation!"
                     echo -e '\e[31m'"Choose another set of packages if you cannot use another disk!"
                 fi
@@ -236,27 +236,27 @@ pkgs(){
         choice=$(gum choose "Desktop with Plasma (default)" "Desktop with Hyprland" "Desktop with Xfce" "Desktop with LXQt" "Command line" "Minimal" "Help" --header="Choose a set of packages:")
         case $choice in
             "Desktop with Plasma (default)")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk power-profiles-daemon man sl"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk power-profiles-daemon man-db man-pages sl wget bash-completion"
                 profile="Desktop (Plasma)"
                 loop=0
                 ;;
             "Desktop with Hyprland")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man sl"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion"
                 profile="Desktop (Hyprland)"
                 loop=0
                 ;;
             "Desktop with Xfce")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies gparted plymouth thunar discover packagekit packagekit-qt6 vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man sl"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies gparted plymouth thunar discover packagekit packagekit-qt6 vlc iwd git nano dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk pavucontrol man-db man-pages sl wget bash-completion"
                 profile="Desktop (Xfce)"
                 loop=0
                 ;;
             "Desktop with LXQt")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar discover packagekit packagekit-qt6 lxqt vlc iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man sl"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar discover packagekit packagekit-qt6 lxqt vlc iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion"
                 profile="Desktop (LXQt)"
                 loop=0
                 ;;
             "Command line")
-                pkglist="base linux linux-firmware screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav man sl"
+                pkglist="base linux linux-firmware screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav man-db man-pages sl wget bash-completion"
                 profile="Command line"
                 loop=0
                 ;;
@@ -1071,18 +1071,39 @@ sudo mv /etc/sddm.conf.d /etc/sddm.conf
 yay -R --noconfirm plasma-bigscreen
 EOF
 fi
-# Install hyprland configuration files
+# Install Hyprland configuration files
 if [[ $profile == "Desktop (Hyprland)" ]]; then
     cat >> jdai-usr.sh << "EOF"
 cd ..
 git clone https://github.com/JaredDinosaur/hyprconf
 cd hyprconf
-mkdir ~/.config/hypr
-mkdir ~/.config/kitty
+mkdir -p ~/.config/hypr
+mkdir -p ~/.config/kitty
 cp hyprland.conf ~/.config/hypr
 cp kitty.conf ~/.config/kitty
 sudo cp config.jsonc /etc/xdg/waybar
 sudo cp style.css /etc/xdg/waybar
+EOF
+fi
+# Install Xfce configuration files
+if [[ $profile == "Desktop (Xfce)" ]]; then
+    cat >> jdai-usr.sh << "EOF"
+cd ..
+git clone https://github.com/JaredDinosaur/xfceconf
+cd xfceconf
+mv org.kde.discover.notifier.desktop ..
+mv battery-13.rc ..
+mv xfce4-clipman-actions.xml ..
+mkdir -p ~/.config/autostart
+mkdir -p ~/.config/xfce4/panel
+mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml
+cp ./* ~/.config/xfce4/xfconf/xfce-perchannel-xml
+mv ../org.kde.discover.notifier.desktop .
+mv ../battery-13.rc .
+mv ../xfce4-clipman-actions.xml .
+cp org.kde.discover.notifier.desktop ~/.config/autostart
+cp battery-13.rc ~/.config/xfce4/panel
+cp xfce4-clipman-actions.xml ~/.config/xfce4/panel
 EOF
 fi
 
@@ -1124,7 +1145,7 @@ case $manpart in
             swap="${disk}p${swapno}"
         fi
         # Get system RAM amount
-        ram=$(grep MemTotal /proc/meminfo | awk '{print int($2/512)}')
+        ram=$(grep MemTotal /proc/meminfo | awk '{print int($2/1024)}')
         # Partition disk:
         # /boot  | 1GB
         # [SWAP] | Same as RAM
