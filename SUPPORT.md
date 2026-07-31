@@ -20,7 +20,7 @@ During the installation, you will have to select Manual configuration for your p
 ### Encryption (prevent Windows from bricking itself)
 If you are not dualbooting alongside Windows, this section may be skipped.
 
-Some Windows systems can activate device encryption or BitLocker. This asks for a key when Secure Boot is disabled, and you may not know the key.
+Some Windows systems can automatically activate device encryption or BitLocker. This asks for a key when Secure Boot is disabled, and you may not know the key.
 
 Check if device encryption or BitLocker is enabled:
 
