@@ -22,6 +22,8 @@ If you are not dualbooting alongside Windows, this section may be skipped.
 
 Some Windows systems can automatically activate device encryption or BitLocker. This asks for a key when Secure Boot is disabled, and you may not know the key.
 
+You can check your Windows edition in Settings > System > About > Windows info
+
 Check if device encryption or BitLocker is enabled:
 
 Windows edition | How to check
@@ -29,6 +31,8 @@ Windows edition | How to check
 Windows 8/8.1/10/11 Pro, Education or Enterprise | Control Panel > System and Security > Manage BitLocker
 Windows 10/11 Home | Settings > Privacy and Security > Device Encryption
 Other | No checking is needed, automatic device encryption does not exist
+
+If the setting doesn't exist, you don't need to worry about this.
 
 **If device encryption or BitLocker is enabled, either disable it or ensure you know the recovery key (i.e. by writing it down).**
 
