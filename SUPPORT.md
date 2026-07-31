@@ -170,6 +170,7 @@ Command | Description
 `sudo systemctl start <service>` | Start a system service
 `sudo systemctl enable <service>` | Enable a system service
 `sudo systemctl enable --now <service>` | Enable and start a system service
+`wget <url>` | Download the contents of a webpage
 
 ## Terminal keyboard shortcuts
 
