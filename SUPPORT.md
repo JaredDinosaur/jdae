@@ -99,7 +99,7 @@ and many more...
 
 ## Terminal commands
 
-### Software management
+### Software and firmware management
 There are two main program types, regular packages and Flatpak packages.
 
 Regular packages are managed with yay, and Flatpak packages are managed with flatpak.
@@ -122,7 +122,7 @@ Both package managers can be used to install several packages at once:
 
 `flatpak install <package1> <package2> <package3> <etc...>`
 
-After performing a full system upgrade, it is recommended to reboot your system.
+After performing a full system upgrade or updating firmware, it is strongly recommended to reboot your system.
 
 Command | Description
 --- | ---
@@ -136,6 +136,8 @@ Command | Description
 `flatpak update` | Upgrade all packages
 `yay -Scc` | Clear cache (this can free up disk space and solve some issues)
 `yay -Syy` | Synchronise package databases
+`sudo fwupdmgr get-updates` | Check for available firmware updates
+`sudo fwupdmgr upgrade` | Install available firmware updates
 
 ### File management
 Command | Description
