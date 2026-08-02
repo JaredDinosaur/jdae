@@ -985,6 +985,7 @@ systemctl enable sddm
 systemctl enable lightdm
 systemctl enable wireplumber
 systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam
+systemctl enable fwupd-refresh.timer
 # Update clamav databases
 freshclam
 EOF
@@ -1158,12 +1159,17 @@ p
 
 +1G
 y
+t
+ef
 n
 p
 2
 
 +${ram}M
 y
+t
+2
+82
 n
 p
 3
