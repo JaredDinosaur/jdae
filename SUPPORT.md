@@ -53,8 +53,8 @@ To do this, run the following commands in the terminal:
 `sudo limine-scan` - Run the boot entry detector. This finds other installed systems and asks which one to add to the boot menu.
 
 ## Apps
-
 **This is not Windows! .exe files will not run by themselves!**
+
 You can use compatibility tools like WINE, Winboat and Bottles to run .exe files.
 
 ### Preinstalled
