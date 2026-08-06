@@ -988,6 +988,8 @@ systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam
 systemctl enable fwupd-refresh.timer
 # Update clamav databases
 freshclam
+# Refresh firmware update databases
+fwupdmgr get-updates -y
 EOF
 # Create boot entry
 if [[ $uefiboot == 1 ]]; then
@@ -1010,6 +1012,8 @@ git clone https://aur.archlinux.org/yay.git
 cd yay
 makepkg -si --noconfirm
 #yay -S --noconfirm limine-entry-tool
+cd ..
+rm -rf yay
 EOF
 
 # Install selected extra packages
@@ -1061,7 +1065,6 @@ fi
 # Install Plasma configuration files
 if [[ $profile == "Desktop (Plasma)" ]]; then
     cat >> jdai-usr.sh << "EOF"
-cd ..
 git clone https://github.com/JaredDinosaur/plasmaconf
 cd plasmaconf
 mv kde_settings.conf ..
@@ -1070,12 +1073,13 @@ mv ../kde_settings.conf .
 sudo cp kde_settings.conf /etc/sddm.conf.d
 sudo mv /etc/sddm.conf.d /etc/sddm.conf
 yay -R --noconfirm plasma-bigscreen
+cd ..
+rm -rf plasmaconf
 EOF
 fi
 # Install Hyprland configuration files
 if [[ $profile == "Desktop (Hyprland)" ]]; then
     cat >> jdai-usr.sh << "EOF"
-cd ..
 git clone https://github.com/JaredDinosaur/hyprconf
 cd hyprconf
 mkdir -p ~/.config/hypr
@@ -1084,12 +1088,13 @@ cp hyprland.conf ~/.config/hypr
 cp kitty.conf ~/.config/kitty
 sudo cp config.jsonc /etc/xdg/waybar
 sudo cp style.css /etc/xdg/waybar
+cd ..
+rm -rf hyprconf
 EOF
 fi
 # Install Xfce configuration files
 if [[ $profile == "Desktop (Xfce)" ]]; then
     cat >> jdai-usr.sh << "EOF"
-cd ..
 git clone https://github.com/JaredDinosaur/xfceconf
 cd xfceconf
 mv org.kde.discover.notifier.desktop ..
@@ -1105,6 +1110,8 @@ mv ../xfce4-clipman-actions.xml .
 cp org.kde.discover.notifier.desktop ~/.config/autostart
 cp battery-13.rc ~/.config/xfce4/panel
 cp xfce4-clipman-actions.xml ~/.config/xfce4/panel
+cd ..
+rm -rf xfceconf
 EOF
 fi
 
@@ -1426,9 +1433,124 @@ arch-chroot /mnt chfn -f "$fullname" $uname
 arch-chroot /mnt chpasswd <<< "$uname:$pass"
 # Run child script within chroot
 arch-chroot /mnt bash ./jdai-efi-2.sh
+
+# Write support document
+if [[ -d /mnt/home/${uname}/Desktop ]]; then
+    supportdir=/mnt/home/${uname}/Desktop
+else
+    supportdir=/mnt/home/${uname}
+fi
+cat >> ${supportdir}/SUPPORT.txt << "EOF"
+
+SUPPORT FOR NEW USERS
+
+This guide is aimed towards the default Plasma desktop environment.
+If you are using a different desktop environment or no desktop, some parts of this guide may be inaccurate.
+
+======== Detecting other systems ========
+If you have the boot menu set to shown, you may want to add another OS on your machine, like Windows, to it.
+To do this, open the terminal (Konsole) and enter the following commands.
+
+yay -S --needed --noconfirm limine-entry-tool
+sudo limine-scan
+
+The first command installs the needed software, and the second command looks for other systems and asks which one to add to the boot menu.
+
+
+======== Installed apps ========
+
+Ark:
+Manage file archives, such as .zip files.
+
+ClamTK:
+Manage antivirus settings and scan a file or folder for threats.
+
+Discover:
+View and manage software, similar to the App Store or Microsoft Store.
+Unlike Windows, Discover is the main way to manage apps and updates.
+All software available in Discover can be downloaded for free, but may contain paid content.
+Discover automatically checks for updates and tells you if any are available.
+It's strongly recommended to update your system at least once a week, and to reboot your machine after updating your system.
+
+Dolphin:
+View and manage your files, similar to Finder or File Explorer.
+
+Filelight:
+See what's taking up space on your device.
+
+Firefox (or another browser):
+Browse the internet.
+Firefox has uBlock Origin installed by default, which blocks advertisements and trackers.
+It is recommended to install the Plasma Integration extension to more easily manage Firefox.
+
+Kate:
+An advanced text editor, similar to VS Code.
+
+KDE Connect:
+Link your phone or tablet with your PC.
+
+KWrite:
+A simple text editor, similar to Notepad.
+
+Spectacle:
+Take screenshots or screen recordings.
+
+System Monitor:
+View system resources and see what's using them, similar to Task Manager.
+
+System Settings:
+Manage your settings.
+
+Timeshift:
+Create and manage system backups.
+It's recommended to set up automatic backup creation.
+
+VLC Media Player:
+View images and videos.
+
+
+======== Gaming ========
+If you're on a laptop, it's recommended to turn off the "Disable while typing" setting for your touchpad.
+This can be found in System Settings > Mouse and Touchpad.
+
+The following apps may not be installed by default, and can be installed in Discover.
+
+Bottles:
+Manage compatibility tools and run Windows games on Linux.
+
+Heroic Launcher:
+Play games from Amazon, Epic Games and GOG (for example, Rocket League).
+
+Minecraft:
+Play Minecraft: Java Edition.
+
+Minecraft Bedrock Launcher:
+Play Minecraft: Bedrock Edition.
+
+Prism Launcher:
+An all-in-one Minecraft: Java Edition launcher.
+This is recommended over the regular Minecraft app to manage instances and mods.
+It supports downloading or importing mods from Modrinth and CurseForge, and can run any game version.
+
+Sober:
+Play Roblox.
+
+Steam:
+It's Steam. It probably has most of your games.
+Steam can take a few minutes to start when you launch it for the first time. Be patient and wait for the login screen to appear.
+
+======== Extra information ========
+The full version of this guide can be found here: https://www.github.com/JaredDinosaur/jdae/blob/main/SUPPORT.md
+
+EOF
+
 # Edit sudo configuration
 sed -i 's/^\(%wheel ALL=(ALL:ALL) NOPASSWD: ALL\)/# \1/' /mnt/etc/sudoers
 sed -i 's/^# \(%wheel ALL=(ALL:ALL) ALL\)/\1/' /mnt/etc/sudoers
+
+# Clean up temporary files
+rm /mnt/home/${uname}/*.sh
+rm /mnt/*.sh
 
 loop=1
 while [[ $loop == 1 ]]; do
