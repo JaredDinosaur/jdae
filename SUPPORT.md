@@ -148,7 +148,7 @@ Command | Description
 `passwd` | Change your password
 `sudo passwd` | Change the password for the root account
 `sudo cryptsetup luksChangeKey /dev/<part>` | Change the encryption password of a disk or partition
-`chfn -f <name>` | Change your user's full name
+`chfn -f "<newname>"` | Change your user's full name
 
 ### File management
 Command | Description
