@@ -54,6 +54,9 @@ To do this, run the following commands in the terminal:
 
 ## Apps
 
+**This is not Windows! .exe files will not run by themselves!**
+You can use compatibility tools like WINE, Winboat and Bottles to run .exe files.
+
 ### Preinstalled
 Program | App description
 --- | ---
@@ -138,6 +141,14 @@ Command | Description
 `yay -Syy` | Synchronise package databases
 `sudo fwupdmgr get-updates` | Check for available firmware updates
 `sudo fwupdmgr upgrade` | Install available firmware updates
+
+### Credential management
+Command | Description
+--- | ---
+`passwd` | Change your password
+`sudo passwd` | Change the password for the root account
+`sudo cryptsetup luksChangeKey /dev/<part>` | Change the encryption password of a disk or partition
+`chfn -f <name>` | Change your user's full name
 
 ### File management
 Command | Description
