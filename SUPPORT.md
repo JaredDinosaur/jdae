@@ -139,6 +139,7 @@ Command | Description
 `flatpak update` | Upgrade all packages
 `yay -Scc` | Clear cache (this can free up disk space and solve some issues)
 `yay -Syy` | Synchronise package databases
+`sudo fwupdmgr refresh` | Check for new firmware updates
 `sudo fwupdmgr get-updates` | Check for available firmware updates
 `sudo fwupdmgr upgrade` | Install available firmware updates
 
