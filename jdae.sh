@@ -989,7 +989,7 @@ systemctl enable fwupd-refresh.timer
 # Update clamav databases
 freshclam
 # Refresh firmware update databases
-fwupdmgr get-updates -y
+fwupdmgr refresh -y
 EOF
 # Create boot entry
 if [[ $uefiboot == 1 ]]; then
