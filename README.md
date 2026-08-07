@@ -4,6 +4,14 @@ A modified version of the Arch Linux live environment which runs a custom instal
 
 The .sh files in the repo are for building the system yourself! Precompiled .iso downloads can be found under releases.
 
+## System requirements
+Resource | Minimum | Recommended
+--- | --- | ---
+CPU | Any x86_64 CPU | 4 threads, 2GHz
+GPU | Any | 2GB VRAM; supports OpenGL 4+, OpenCL 2+, and Vulkan
+RAM | 931MB | 4GB
+Storage | 4GB | 64GB
+
 ## Support for new users
 A guide to helpful programs and commands can be found [here](https://github.com/JaredDinosaur/jdae/blob/main/SUPPORT.md).
 
