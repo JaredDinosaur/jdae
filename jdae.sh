@@ -246,12 +246,12 @@ pkgs(){
                 loop=0
                 ;;
             "Desktop with Xfce")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies gparted plymouth thunar discover packagekit packagekit-qt6 vlc iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd"
                 profile="Desktop (Xfce)"
                 loop=0
                 ;;
             "Desktop with LXQt")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar discover packagekit packagekit-qt6 lxqt vlc iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion fwupd"
                 profile="Desktop (LXQt)"
                 loop=0
                 ;;
