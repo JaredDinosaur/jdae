@@ -1378,10 +1378,10 @@ uuid=$(blkid -s UUID -o value /dev/$root)
 # Enable initramfs hooks
 case $crypt in
     0)
-        sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect keyboard keymap consolefont modconf block filesystems fsck)/' /mnt/etc/mkinitcpio.conf
+        sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect keyboard keymap consolefont modconf block plymouth filesystems fsck)/' /mnt/etc/mkinitcpio.conf
         ;;
     1)
-        sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect keyboard keymap consolefont modconf block encrypt sd-encrypt filesystems fsck)/' /mnt/etc/mkinitcpio.conf
+        sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect keyboard keymap consolefont modconf block plymouth encrypt filesystems fsck)/' /mnt/etc/mkinitcpio.conf
         ;;
 esac
 # Configure bootloader
