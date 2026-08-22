@@ -9,8 +9,8 @@ Resource | Minimum | Recommended
 --- | --- | ---
 CPU | Any x86_64 CPU | 4 threads, 2GHz
 GPU | Any | 2GB VRAM; supports OpenGL 4+, OpenCL 2+, and Vulkan
-RAM | 931MB | 4GB
-Storage | 4GB | 64GB
+RAM | ~1GB | 4GB
+Storage | ~4GB | 64GB
 
 ## Support for new users
 A guide to helpful programs and commands can be found [here](https://github.com/JaredDinosaur/jdae/blob/main/SUPPORT.md).
