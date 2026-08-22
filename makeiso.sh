@@ -9,12 +9,26 @@ set -e
 sudo pacman -S --needed archiso squashfs-tools xorriso
 if [[ -d "archiso" ]]; then
 	echo -e '\e[34m'"[INFO]" '\e(B\e[m'"Removing previous build..."
-	sudo rm -rf archiso
+	case $verbose in
+        0)
+            sudo rm -rf archiso
+            ;;
+        1)
+            sudo rm -rvf archiso
+            ;;
+	esac
 fi
 mkdir -p archiso
 cd archiso
 echo -e '\e[34m'"[INFO]" '\e(B\e[m'"Configuring system..."
-cp -r /usr/share/archiso/configs/releng jdae
+case $verbose in
+    0)
+        cp -r /usr/share/archiso/configs/releng jdae
+        ;;
+    1)
+        cp -rv /usr/share/archiso/configs/releng jdae
+        ;;
+esac
 cd jdae
 cat >> packages.x86_64 << "EOF"
 networkmanager
@@ -59,15 +73,10 @@ if [[ $(tty) == "/dev/tty1" ]]; then
             echo "The installer has exited."
             echo "If you chose clean up and exit, press Ctrl+D to reopen the installer."
             echo "Otherwise, the following commands must be run beforehand before reopening:"
-            echo "umount /mnt/boot"
-            echo "umount /mnt"
-            echo "swapoff -a"
-            echo "cryptsetup close /dev/mapper/root"
+            echo "umount -Rv /mnt"
+            echo "swapoff -av"
+            echo "cryptsetup close -v /dev/mapper/root"
             echo ""
-            ;;
-        1)
-            ;;
-        2)
             ;;
         *)
             echo ""
@@ -75,10 +84,9 @@ if [[ $(tty) == "/dev/tty1" ]]; then
             echo ""
             echo "The installer has exited."
             echo "To start another installation, run the following commands:"
-            echo "umount /mnt/boot"
-            echo "umount /mnt"
-            echo "swapoff -a"
-            echo "cryptsetup close /dev/mapper/root"
+            echo "umount -Rv /mnt"
+            echo "swapoff -av"
+            echo "cryptsetup close -v /dev/mapper/root"
             echo ""
             echo "Then press Ctrl+D to reopen the installer."
             echo ""
@@ -88,7 +96,14 @@ fi
 EOF
 
 echo -e '\e[34m'"[INFO]" '\e(B\e[m'"Cleaning up..."
-sudo rm -rf work out
+case $verbose in
+    0)
+        sudo rm -rf work out
+        ;;
+    1)
+        sudo rm -rvf work out
+        ;;
+esac
 cd ..
 echo -e '\e[34m'"[INFO]" '\e(B\e[m'"Building image (should take 20-30 minutes)..."
 case $verbose in

@@ -236,27 +236,27 @@ pkgs(){
         choice=$(gum choose "Desktop with Plasma (default)" "Desktop with Hyprland" "Desktop with Xfce" "Desktop with LXQt" "Command line" "Minimal" "Help" --header="Choose a set of packages:")
         case $choice in
             "Desktop with Plasma (default)")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk power-profiles-daemon man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk power-profiles-daemon man-db man-pages sl wget bash-completion fwupd"
                 profile="Desktop (Plasma)"
                 loop=0
                 ;;
             "Desktop with Hyprland")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop xdg-user-dirs partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xdg-user-dirs partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion fwupd"
                 profile="Desktop (Hyprland)"
                 loop=0
                 ;;
             "Desktop with Xfce")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies xdg-user-dirs gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies xdg-user-dirs gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd"
                 profile="Desktop (Xfce)"
                 loop=0
                 ;;
             "Desktop with LXQt")
-                pkglist="base linux linux-firmware filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc vlc-plugins-all iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc vlc-plugins-all iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion fwupd"
                 profile="Desktop (LXQt)"
                 loop=0
                 ;;
             "Command line")
-                pkglist="base linux linux-firmware screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav man-db man-pages sl wget bash-completion fwupd"
                 profile="Command line"
                 loop=0
                 ;;
@@ -574,7 +574,7 @@ pkgs(){
                 while [[ $submenu == 1 ]]; do
                     clear
                     echo -e '\e[3m'"Select your graphics card driver."'\e(B\e[m'
-                    echo -e '\e[3m'"For Nvidia, proprietary drivers are better for more recent cards (GTX 1650 or newer)."'\e(B\e[m'
+                    echo -e '\e[3m'"For Nvidia, open source drivers are better for more recent cards (GTX 1650 or newer)."'\e(B\e[m'
                     echo -e '\e[3m'"If your machine has no graphics card, select your CPU manufacturer."'\e(B\e[m'
                     choice=$(gum choose "Intel" "AMD (Radeon)" "Nvidia (Open Source)" "Nvidia (Proprietary)" "No Driver" --header="")
                     case $choice in
@@ -592,13 +592,13 @@ pkgs(){
                             ;;
                         "Nvidia (Open Source)")
                             gpudrv=1
-                            gpupkg="vulkan-nouveau xf86-video-nouveau lib32-vulkan-nouveau"
+                            gpupkg="vulkan-nouveau xf86-video-nouveau lib32-vulkan-nouveau nvidia-utils nvidia-open-dkms lib32-nvidia-utils nvidia-settings"
                             gpuconf="Nvidia (Open Source)"
                             submenu=0
                             ;;
                         "Nvidia (Proprietary)")
                             gpudrv=1
-                            gpupkg="nvidia nvidia-utils lib32-nvidia-utils"
+                            gpupkg="vulkan-nouveau xf86-video-nouveau lib32-vulkan-nouveau nvidia-utils nvidia-dkms lib32-nvidia-utils nvidia-settings"
                             gpuconf="Nvidia (Proprietary)"
                             submenu=0
                             ;;
@@ -968,14 +968,14 @@ chmod +x jdai-usr.sh
 
 # Set timezone (GB only)
 if [[ $reg == "GB" ]]; then
-    echo "ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime" >> jdai-efi-2.sh
+    echo "ln -svf /usr/share/zoneinfo/Europe/London /etc/localtime" >> jdai-efi-2.sh
     echo "hwclock --systohc" >> jdai-efi-2.sh
 fi
 cat >> jdai-efi-2.sh << "EOF"
 # Generate locale
 locale-gen
 # Generate initramfs
-mkinitcpio -P
+mkinitcpio -vP
 # Enable system services
 systemctl enable ip6tables iptables iwd NetworkManager-dispatcher NetworkManager systemd-network-generator systemd-networkd wpa_supplicant
 systemctl enable accounts-daemon
@@ -988,8 +988,6 @@ systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam
 systemctl enable fwupd-refresh.timer
 # Update clamav databases
 freshclam
-# Refresh firmware update databases
-fwupdmgr refresh -y
 EOF
 # Create boot entry
 if [[ $uefiboot == 1 ]]; then
@@ -999,7 +997,7 @@ if [[ $biosboot == 1 ]]; then
     echo "limine bios-install /dev/$disk" >> jdai-efi-2.sh
 fi
 # Copy child scripts
-echo "cp jdai-usr.sh /home/$uname" >> jdai-efi-2.sh
+echo "cp -v jdai-usr.sh /home/$uname" >> jdai-efi-2.sh
 # Switch to newly created user
 echo "cd /home/$uname" >> jdai-efi-2.sh
 # Run child script as new user
@@ -1013,7 +1011,7 @@ cd yay
 makepkg -si --noconfirm
 #yay -S --noconfirm limine-entry-tool
 cd ..
-rm -rf yay
+rm -rvf yay
 EOF
 
 # Install selected extra packages
@@ -1067,14 +1065,14 @@ if [[ $profile == "Desktop (Plasma)" ]]; then
     cat >> jdai-usr.sh << "EOF"
 git clone https://github.com/JaredDinosaur/plasmaconf
 cd plasmaconf
-mv kde_settings.conf ..
-cp ./* ~/.config
-mv ../kde_settings.conf .
-sudo cp kde_settings.conf /etc/sddm.conf.d
-sudo mv /etc/sddm.conf.d /etc/sddm.conf
+mv -v kde_settings.conf ..
+cp -v ./* ~/.config
+mv -v ../kde_settings.conf .
+sudo cp -v kde_settings.conf /etc/sddm.conf.d
+sudo mv -v /etc/sddm.conf.d /etc/sddm.conf
 yay -R --noconfirm plasma-bigscreen
 cd ..
-rm -rf plasmaconf
+rm -rvf plasmaconf
 EOF
 fi
 # Install Hyprland configuration files
@@ -1082,14 +1080,14 @@ if [[ $profile == "Desktop (Hyprland)" ]]; then
     cat >> jdai-usr.sh << "EOF"
 git clone https://github.com/JaredDinosaur/hyprconf
 cd hyprconf
-mkdir -p ~/.config/hypr
-mkdir -p ~/.config/kitty
-cp hyprland.conf ~/.config/hypr
-cp kitty.conf ~/.config/kitty
-sudo cp config.jsonc /etc/xdg/waybar
-sudo cp style.css /etc/xdg/waybar
-cd ..
-rm -rf hyprconf
+mkdir -vp ~/.config/hypr
+mkdir -vp ~/.config/kitty
+cp -v hyprland.conf ~/.config/hypr
+cp -v kitty.conf ~/.config/kitty
+sudo cp -v config.jsonc /etc/xdg/waybar
+sudo cp -v style.css /etc/xdg/waybar
+cd -v ..
+rm -rvf hyprconf
 EOF
 fi
 # Install Xfce configuration files
@@ -1097,21 +1095,21 @@ if [[ $profile == "Desktop (Xfce)" ]]; then
     cat >> jdai-usr.sh << "EOF"
 git clone https://github.com/JaredDinosaur/xfceconf
 cd xfceconf
-mv org.kde.discover.notifier.desktop ..
-mv battery-13.rc ..
-mv xfce4-clipman-actions.xml ..
-mkdir -p ~/.config/autostart
-mkdir -p ~/.config/xfce4/panel
-mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml
-cp ./* ~/.config/xfce4/xfconf/xfce-perchannel-xml
-mv ../org.kde.discover.notifier.desktop .
-mv ../battery-13.rc .
-mv ../xfce4-clipman-actions.xml .
-cp org.kde.discover.notifier.desktop ~/.config/autostart
-cp battery-13.rc ~/.config/xfce4/panel
-cp xfce4-clipman-actions.xml ~/.config/xfce4/panel
-cd ..
-rm -rf xfceconf
+mv -v org.kde.discover.notifier.desktop ..
+mv -v battery-13.rc ..
+mv -v xfce4-clipman-actions.xml ..
+mkdir -vp ~/.config/autostart
+mkdir -vp ~/.config/xfce4/panel
+mkdir -vp ~/.config/xfce4/xfconf/xfce-perchannel-xml
+cp -v ./* ~/.config/xfce4/xfconf/xfce-perchannel-xml
+mv -v ../org.kde.discover.notifier.desktop .
+mv -v ../battery-13.rc .
+mv -v ../xfce4-clipman-actions.xml .
+cp -v org.kde.discover.notifier.desktop ~/.config/autostart
+cp -v battery-13.rc ~/.config/xfce4/panel
+cp -v xfce4-clipman-actions.xml ~/.config/xfce4/panel
+cd -v ..
+rm -rvf xfceconf
 EOF
 fi
 
@@ -1154,6 +1152,9 @@ case $manpart in
         fi
         # Get system RAM amount
         ram=$(grep MemTotal /proc/meminfo | awk '{print int($2/1024)}')
+        ## Wipe partition information from disk
+        #wipefs -a /dev/$disk
+        #blkdiscard /dev/$disk
         # Partition disk:
         # /boot  | 1GB
         # [SWAP] | Same as RAM
@@ -1333,26 +1334,26 @@ case $crypt in
             mkfs.$rootfs -f /dev/$root
         fi
         # Mount root partition to /mnt
-        mount /dev/$root /mnt
+        mount /dev/$root /mnt -v
         ;;
     1)
         # Format and encrypt root partition
         printf "%s" "$cryptpass" | cryptsetup -v --batch-mode luksFormat /dev/$root -
-        printf "%s" "$cryptpass" | cryptsetup open /dev/$root root -
+        printf "%s" "$cryptpass" | cryptsetup -v open /dev/$root root -
         mkfs.$rootfs /dev/mapper/root
         # Mount root partition to /mnt
-        mount /dev/mapper/root /mnt
+        mount /dev/mapper/root /mnt -v
         ;;
 esac
 if [[ $formboot == 1 ]]; then
     # Format ESP
-    mkfs.fat -F32 /dev/$boot
+    mkfs.fat -F32 /dev/$boot -v
 fi
 # Mount ESP to /mnt/boot
-mount --mkdir /dev/$boot /mnt/boot
+mount --mkdir /dev/$boot /mnt/boot -v
 # Format and activate swap partition
-mkswap /dev/$swap
-swapon /dev/$swap
+mkswap /dev/$swap --verbose
+swapon /dev/$swap -v
 # Install packages
 pacstrap -K /mnt $pkglist
 # Configure filesystem mount points
@@ -1367,11 +1368,11 @@ fi
 echo $hname > /mnt/etc/hostname
 if [[ $uefiboot == 1 ]]; then
     # Create EFI boot point
-    cp /mnt/usr/share/limine/BOOTX64.EFI /mnt/boot/
+    cp -v /mnt/usr/share/limine/BOOTX64.EFI /mnt/boot/
 fi
 if [[ $biosboot == 1 ]]; then
     # Create BIOS boot point
-    cp /mnt/usr/share/limine/limine-bios.sys /mnt/boot/
+    cp -v /mnt/usr/share/limine/limine-bios.sys /mnt/boot/
 fi
 # Get root partition UUID
 uuid=$(blkid -s UUID -o value /dev/$root)
@@ -1549,8 +1550,11 @@ sed -i 's/^\(%wheel ALL=(ALL:ALL) NOPASSWD: ALL\)/# \1/' /mnt/etc/sudoers
 sed -i 's/^# \(%wheel ALL=(ALL:ALL) ALL\)/\1/' /mnt/etc/sudoers
 
 # Clean up temporary files
-rm /mnt/home/${uname}/*.sh
-rm /mnt/*.sh
+rm -v /mnt/home/${uname}/*.sh
+rm -v /mnt/*.sh
+rm -rvf /mnt/home/${uname}/.cache/yay/*
+rm -rvf /mnt/var/cache/pacman/pkg/*
+rm -rvf /mnt/tmp/*
 
 loop=1
 while [[ $loop == 1 ]]; do
@@ -1577,10 +1581,9 @@ while [[ $loop == 1 ]]; do
             ;;
         "Clean up and exit")
             set +e
-            umount /mnt/boot
-            umount /mnt
-            swapoff -a
-            cryptsetup close /dev/mapper/root
+            umount -Rv /mnt
+            swapoff -av
+            cryptsetup close -v /dev/mapper/root
             set -e
             clear
             loop=0
