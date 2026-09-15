@@ -1,29 +1,24 @@
 # Support for new users
 
 ## Dual booting
-
-**If you are planning to only run one operating system on your machine, you may [skip this section](https://github.com/JaredDinosaur/jdae/blob/main/SUPPORT.md#apps).**
+> [!NOTE]
+> **If you are planning to only run one operating system on your machine, you may [skip this section](SUPPORT.md#secure-boot).**
 
 ### Disk Preparation
 Ensure you have an empty disk to install Linux on.
-
-**It is not recommended to dual boot Linux and another operating system on the same disk!**
-
-This is because you will have less disk space and the different systems can interfere with each other.
-
-If you have no other choice, make sure to create free space on your disk by shrinking your current system.
-
-You can do this in Windows by right-clicking on the Windows icon and selecting Disk Management.
-
-During the installation, you will have to select Manual configuration for your partitioning method if you are dualbooting on a single disk.
+> [!WARNING]
+> **It is not recommended to dual boot Linux and another operating system on the same disk!**\
+> This is because you will have less disk space and the different systems can interfere with each other.\
+> If you have no other choice, make sure to create free space on your disk by shrinking your current system.\
+> You can do this in Windows by right-clicking on the Windows icon and selecting Disk Management.
+> During the installation, you will have to select Manual configuration for your partitioning method if you are dualbooting on a single disk.
 
 ### Encryption (prevent Windows from bricking itself)
-If you are not dualbooting alongside Windows, this section may be skipped.
+> [!NOTE]
+> **If you are not dualbooting alongside Windows, you may [skip this section](SUPPORT.md#secure-boot).**
 
-Some Windows systems can automatically activate device encryption or BitLocker. This asks for a key when Secure Boot is disabled, and you may not know the key.
-
-You can check your Windows edition in Settings > System > About > Windows info
-
+Some Windows systems can automatically activate device encryption or BitLocker. This asks for a key when Secure Boot is disabled, and you may not know the key.\
+You can check your Windows edition in Settings > System > About > Windows info.\
 Check if device encryption or BitLocker is enabled:
 
 Windows edition | How to check
@@ -32,30 +27,31 @@ Windows 8/8.1/10/11 Pro, Education or Enterprise | Control Panel > System and Se
 Windows 10/11 Home | Settings > Privacy and Security > Device Encryption
 Other | No checking is needed, automatic device encryption does not exist
 
-If the setting doesn't exist, you don't need to worry about this.
+> [!NOTE]
+> If the setting doesn't exist in either of the previously mentioned places, you don't need to worry about this.\
+> It means your version of Windows does not support automatic device encryption.
 
-**If device encryption or BitLocker is enabled, either disable it or ensure you know the recovery key (i.e. by writing it down).**
-
-### Secure Boot
-Some systems have Secure Boot enabled, which makes it difficult for most Linux environments to boot.
-
-In your BIOS/UEFI settings, check whether Secure Boot is enabled.
-
-If it is enabled, you must disable it or configure it to accept JDAE.
+> [!WARNING]
+> **If device encryption or BitLocker is enabled, either disable it or ensure you know the recovery key (i.e. by writing it down)!**\
+> **If you do not do this, you may be unable to access Windows!**
 
 ### Boot entry detection
-If you choose to show the boot menu, you may want to add other systems you have installed (such as Windows).
-
-To do this, run the following commands in the terminal:
-
-`yay -S --needed --noconfirm limine-entry-tool` - Install the boot entry detector. This should take less than five minutes.
-
+If you choose to show the boot menu, you may want to add other systems you have installed (such as Windows).\
+To do this, run the following commands in the terminal once you've booted into your new Linux installation:\
+`yay -S --needed --noconfirm limine-entry-tool` - Install the boot entry detector. This should take less than five minutes.\
 `sudo limine-scan` - Run the boot entry detector. This finds other installed systems and asks which one to add to the boot menu.
 
-## Apps
-**This is not Windows! .exe files will not run by themselves!**
+## Secure Boot
+> [!IMPORTANT]
+> Some systems have Secure Boot enabled, which makes it difficult for most Linux environments to boot.\
+> In your BIOS/UEFI settings, check whether Secure Boot is enabled.\
+> If it is enabled, you must disable it (by far the easiest option) or configure it to accept JDAE.\
+> If you configure it to accept JDAE, you must also configure it to accept your newly installed system once the installation has completed.
 
-You can use compatibility tools like WINE, Winboat and Bottles to run .exe files.
+## Apps
+> [!IMPORTANT]
+> **This is not Windows! .exe files will not run by themselves!**\
+> You can use compatibility tools like WINE, Winboat and Bottles to run .exe files.
 
 ### Preinstalled
 Program | App description
@@ -103,29 +99,24 @@ and many more...
 ## Terminal commands
 
 ### Software and firmware management
-There are two main program types, regular packages and Flatpak packages.
+There are two main program types, regular packages and Flatpak packages.\
+Regular packages are managed with yay, and Flatpak packages are managed with flatpak.\
+Both can be managed seamlessly in the Discover app.\
+If a program is available as both a regular package and a Flatpak package, there is usually little to no difference between the two.
 
-Regular packages are managed with yay, and Flatpak packages are managed with flatpak.
-
-Both can be managed seamlessly in the Discover app.
-
-Some programs are available as both a regular and Flatpak package.
-
-Regular packages have short names, whereas Flatpak names are formatted like URLs.
-
-For example, to install Discord:
-
-As a regular package - `yay -S discord`
-
+Some programs are available as both a regular and Flatpak package.\
+Regular packages have short names, whereas Flatpak names are formatted like URLs.\
+For example, you would run these commands to install Discord:\
+As a regular package - `yay -S discord`\
 As a Flatpak package - `flatpak install com.discordapp.Discord`
 
-Both package managers can be used to install several packages at once:
+Both package managers can be used to install several packages at once:\
+`yay -S <package1> <package2> <package3> <etc...>`\
+`flatpak install <package1> <package2> <package3> <etc...>`\
 
-`yay -S <package1> <package2> <package3> <etc...>`
-
-`flatpak install <package1> <package2> <package3> <etc...>`
-
-After performing a full system upgrade or updating firmware, it is strongly recommended to reboot your system.
+> [!TIP]
+> After performing a full system upgrade or updating firmware, it is strongly recommended to reboot your system.\
+> Most programs should work fine without a reboot, but rebooting can prevent problems and ensures stability.
 
 Command | Description
 --- | ---
@@ -197,9 +188,8 @@ Ctrl + R | Search through previously run commands
 Ctrl + Z | Place the current running process in the background
 
 ## Other resources
-
-Google is your friend! It's okay to look things up if you don't know what to do.
-
+Google is your friend! It's okay to look things up if you don't know what to do.\
 For most questions you may have for a program, `man <program>` or the [Arch wiki](https://wiki.archlinux.org/title/Main_page) will have the answer.
 
-It is not recommended to rely on AI for support as it can often make mistakes, which could potentially lead to you breaking your system.
+> [!CAUTION]
+> It is not recommended to rely on AI for support as it can often make mistakes, which could potentially lead to you breaking your system.
