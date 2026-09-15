@@ -14,7 +14,7 @@ Storage | ~4GB | 64GB
 
 ## Support for new users
 >[!TIP]
-> A guide to helpful programs and commands can be found [here](https://github.com/JaredDinosaur/jdae/blob/main/SUPPORT.md).
+> A guide to helpful programs and commands can be found [here](SUPPORT.md).
 
 ## Known issues:
 > [!NOTE]
