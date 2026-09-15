@@ -1,8 +1,8 @@
 # jdae
 
 A modified version of the Arch Linux live environment which runs a custom install script on startup.
-
-The .sh files in the repo are for building the system yourself! Precompiled .iso downloads can be found under releases.
+> [!IMPORTANT]
+> The .sh files in this repo are for building the system yourself! Precompiled .iso downloads can be found under Releases.
 
 ## System requirements
 Resource | Minimum | Recommended
@@ -13,10 +13,12 @@ RAM | ~1GB | 4GB
 Storage | ~4GB | 64GB
 
 ## Support for new users
-A guide to helpful programs and commands can be found [here](https://github.com/JaredDinosaur/jdae/blob/main/SUPPORT.md).
+>[!TIP]
+> A guide to helpful programs and commands can be found [here](https://github.com/JaredDinosaur/jdae/blob/main/SUPPORT.md).
 
 ## Known issues:
-Issues under Miscallaneous are bugs in other programs which cannot be fixed within the installer.
+> [!NOTE]
+> Issues under Miscallaneous are bugs in other programs which cannot be fixed within the installer.
 ### Installer-related:
 - On some machines, especially VMs, the installer may fail to mount /mnt/boot on its first try. If the installation is run again, it works. The reason for this is currently unknown.
 - ext4 will ask for confirmation when overwriting an existing partition.
