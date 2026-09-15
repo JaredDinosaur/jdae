@@ -49,7 +49,7 @@ To do this, run the following commands in the terminal once you've booted into y
 > If you configure it to accept JDAE, you must also configure it to accept your newly installed system once the installation has completed.
 
 ## Apps
-> [!IMPORTANT]
+> [!WARNING]
 > **This is not Windows! .exe files will not run by themselves!**\
 > You can use compatibility tools like WINE, Winboat and Bottles to run .exe files.
 
