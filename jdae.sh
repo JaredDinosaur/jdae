@@ -42,26 +42,158 @@ setlocale(){
                 ;;
         esac
     done
+    keymaps=$(localectl list-keymaps)
+    locales=$(ls /usr/share/i18n/locales)
+    timezones=$(timedatectl list-timezones)
     loop=1
     while [[ $loop == 1 ]]; do
         clear
-        choice=$(gum choose "English - United Kingdom (default)" "English - United States" --header="Select your locale:")
+        choice=$(gum choose "United Kingdom (default)" "United States" "Other" --header="Select your keyboard layout:")
         case $choice in
-            "English - United Kingdom (default)")
+            "United Kingdom (default)")
                 keys="uk"
-                reg="GB"
                 loop=0
                 ;;
-            "English - United States")
-                keys="--default"
-                reg="US"
+            "United States")
+                keys="us"
                 loop=0
+                ;;
+            "Other")
+                clear
+                keys="uk"
+                submenu=1
+                while [[ $submenu == 1 ]]; do
+                    choice=$(gum choose "Select a keyboard layout" "List all available layouts (press q to stop viewing)" --header="Choose an option:")
+                    case $choice in
+                        "Select a keyboard layout")
+                            clear
+                            keys=$(gum input --prompt="Enter a keyboard layout: " --placeholder="uk")
+                            if [[ $keys == "" ]]; then
+                                keys=uk
+                            fi
+                            if [[ $keymaps != *"$keys"* ]]; then
+                                clear
+                                echo
+                                echo "You did not select a valid keyboard layout!"
+                            else
+                                loadkeys $keys
+                                submenu=0
+                                loop=0
+                            fi
+                            ;;
+                        "List all available layouts (press q to stop viewing)")
+                            clear
+                            localectl list-keymaps
+                            clear
+                            ;;
+                        *)
+                            ;;
+                    esac
+                done
                 ;;
             *)
                 ;;
         esac
     done
     loadkeys $keys
+    loop=1
+    while [[ $loop == 1 ]]; do
+        clear
+        choice=$(gum choose "English - United Kingdom (default)" "English - United States" "Other" --header="Select your locale:")
+        case $choice in
+            "English - United Kingdom (default)")
+                locale="en_GB"
+                loop=0
+                ;;
+            "English - United States")
+                locale="en_US"
+                loop=0
+                ;;
+            "Other")
+                clear
+                locale="en_GB"
+                submenu=1
+                while [[ $submenu == 1 ]]; do
+                    choice=$(gum choose "Select a locale" "List all available locales (press q to stop viewing)" --header="Choose an option:")
+                    case $choice in
+                        "Select a locale")
+                            clear
+                            locale=$(gum input --prompt="Enter a locale: " --placeholder="en_GB")
+                            if [[ $locale == "" ]]; then
+                                locale="en_GB"
+                            fi
+                            if [[ $locales != *"$locale"* ]]; then
+                                clear
+                                echo
+                                echo "You did not select a valid locale!"
+                            else
+                                submenu=0
+                                loop=0
+                            fi
+                            ;;
+                        "List all available locales (press q to stop viewing)")
+                            clear
+                            ls /usr/share/i18n/locales | less
+                            clear
+                            ;;
+                        *)
+                            ;;
+                    esac
+                done
+                ;;
+            *)
+                ;;
+        esac
+    done
+    loop=1
+    while [[ $loop == 1 ]]; do
+        clear
+        choice=$(gum choose "London (default)" "New York" "Other" --header="Select your timezone:")
+        case $choice in
+            "London (default)")
+                timezone="Europe/London"
+                loop=0
+                ;;
+            "New York")
+                timezone="US/Eastern"
+                loop=0
+                ;;
+            "Other")
+                clear
+                timezone="Europe/London"
+                submenu=1
+                while [[ $submenu == 1 ]]; do
+                    choice=$(gum choose "Select a timezone" "List all available timezones (press q to stop viewing)" --header="Choose an option:")
+                    case $choice in
+                        "Select a timezone")
+                            clear
+                            timezone=$(gum input --prompt="Enter a timezone: " --placeholder="Europe/London")
+                            if [[ $locale == "" ]]; then
+                                timezone="Europe/London"
+                            fi
+                            if [[ $timezones != *"$timezone"* ]]; then
+                                clear
+                                echo
+                                echo "You did not select a valid timezone!"
+                            else
+                                submenu=0
+                                loop=0
+                            fi
+                            ;;
+                        "List all available timezones (press q to stop viewing)")
+                            clear
+                            timedatectl list-timezones
+                            clear
+                            ;;
+                        *)
+                            ;;
+                    esac
+                done
+                ;;
+            *)
+                ;;
+        esac
+    done
 }
 
 diskpart(){
@@ -142,7 +274,7 @@ diskpart(){
     loop=1
     while [[ $loop == 1 ]]; do
         clear
-        choice=$(gum choose "ext4 (default)" "btrfs" "xfs" "Help" --header="Choose a root filesystem:")
+        choice=$(gum choose "ext4 (default)" "btrfs" "xfs" "f2fs" "Help" --header="Choose a root filesystem:")
         case $choice in
             "ext4 (default)")
                 rootfs="ext4"
@@ -154,6 +286,10 @@ diskpart(){
                 ;;
             "xfs")
                 rootfs="xfs"
+                loop=0
+                ;;
+            "f2fs")
+                rootfs="f2fs"
                 loop=0
                 ;;
             "Help")
@@ -168,6 +304,9 @@ diskpart(){
                 echo
                 echo -e '\e[35m'"xfs"'\e(B\e[m'":"
                 echo "High performance filesystem. Good for servers and large drives, but cannot be shrunk."
+                echo
+                echo -e '\e[35m'"f2fs"'\e(B\e[m'":"
+                echo "A filesystem designed for flash storage and SSDs. Can improve your SSD's lifespan, but is slightly less stable."
                 echo
                 echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
                 read -n 1
@@ -236,27 +375,27 @@ pkgs(){
         choice=$(gum choose "Desktop with Plasma (default)" "Desktop with Hyprland" "Desktop with Xfce" "Desktop with LXQt" "Command line" "Minimal" "Help" --header="Choose a set of packages:")
         case $choice in
             "Desktop with Plasma (default)")
-                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk power-profiles-daemon man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools power-profiles-daemon man-db man-pages sl wget bash-completion fwupd fd parallel"
                 profile="Desktop (Plasma)"
                 loop=0
                 ;;
             "Desktop with Hyprland")
-                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xdg-user-dirs partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xdg-user-dirs partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel"
                 profile="Desktop (Hyprland)"
                 loop=0
                 ;;
             "Desktop with Xfce")
-                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies xdg-user-dirs gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies xdg-user-dirs gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd fd parallel"
                 profile="Desktop (Xfce)"
                 loop=0
                 ;;
             "Desktop with LXQt")
-                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc vlc-plugins-all iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav clamtk man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc vlc-plugins-all iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel"
                 profile="Desktop (LXQt)"
                 loop=0
                 ;;
             "Command line")
-                pkglist="base linux linux-firmware linux-headers screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs clamav man-db man-pages sl wget bash-completion fwupd"
+                pkglist="base linux linux-firmware linux-headers screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel"
                 profile="Command line"
                 loop=0
                 ;;
@@ -325,7 +464,6 @@ pkgs(){
     browser="Firefox"
     browserpkg="firefox firefox-i18n-uk firefox-ublock-origin"
     getwinfs=0
-    getf2fs=0
     getapplefs=0
     getjfs=0
     getudf=0
@@ -337,6 +475,7 @@ pkgs(){
     gpudrv=0
     gpuconf="None"
     gettimeshift=0
+    getclamav=1
     getvpn=0
 
     loop=1
@@ -363,11 +502,6 @@ pkgs(){
             echo -e '\e[35m'"==>" '\e(B\e[m'"ZFS (high performance filesystem): No"
         else
             echo -e '\e[35m'"==>" '\e(B\e[m'"ZFS (high performance filesystem): Yes"
-        fi
-        if [[ $getf2fs == 0 ]]; then
-            echo -e '\e[35m'"==>" '\e(B\e[m'"f2fs (SSD-friendly filesystem): No"
-        else
-            echo -e '\e[35m'"==>" '\e(B\e[m'"f2fs (SSD-friendly filesystem): Yes"
         fi
         if [[ $getudf == 0 ]]; then
             echo -e '\e[35m'"==>" '\e(B\e[m'"UDF (DVD filesystem): No"
@@ -401,13 +535,18 @@ pkgs(){
         else
             echo -e '\e[36m'"[5]" '\e(B\e[m'"Timeshift (backup utility): Yes"
         fi
+        if [[ $getclamav == 0 ]]; then
+            echo -e '\e[36m'"[6]" '\e(B\e[m'"ClamAV (antivirus + threat scanner): No"
+        else
+            echo -e '\e[36m'"[6]" '\e(B\e[m'"ClamAV (antivirus + threat scanner): Yes"
+        fi
         echo
         echo -e '\e[36m'"[0]" '\e(B\e[m'"Done"
         read -n 1 choice
         case $choice in
             1)
                 clear
-                choice=$(gum choose "Firefox (default)" "Brave" "Zen Browser" "Helium Browser" "Mullvad Browser" "None" --header="Choose a web browser:")
+                choice=$(gum choose "Firefox (default)" "Brave" "Vivaldi" "Zen Browser" "Helium Browser" "Mullvad Browser" "None" --header="Choose a web browser:")
                 case $choice in
                     "Firefox (default)")
                         browser="Firefox"
@@ -416,6 +555,10 @@ pkgs(){
                     "Brave")
                         browser="Brave"
                         browserpkg="brave-bin"
+                        ;;
+                    "Vivaldi")
+                        browser="Vivaldi"
+                        browserpkg="vivaldi"
                         ;;
                     "Zen Browser")
                         browser="Zen Browser"
@@ -456,23 +599,18 @@ pkgs(){
                     else
                         echo -e '\e[36m'"[3]" '\e(B\e[m'"ZFS (high performance filesystem): Yes"
                     fi
-                    if [[ $getf2fs == 0 ]]; then
-                        echo -e '\e[36m'"[4]" '\e(B\e[m'"f2fs (SSD-friendly filesystem): No"
-                    else
-                        echo -e '\e[36m'"[4]" '\e(B\e[m'"f2fs (SSD-friendly filesystem): Yes"
-                    fi
                     if [[ $getudf == 0 ]]; then
-                        echo -e '\e[36m'"[5]" '\e(B\e[m'"UDF (DVD filesystem): No"
+                        echo -e '\e[36m'"[4]" '\e(B\e[m'"UDF (DVD filesystem): No"
                     else
-                        echo -e '\e[36m'"[5]" '\e(B\e[m'"UDF (DVD filesystem): Yes"
+                        echo -e '\e[36m'"[4]" '\e(B\e[m'"UDF (DVD filesystem): Yes"
                     fi
                     if [[ $getjfs == 0 ]]; then
-                        echo -e '\e[36m'"[6]" '\e(B\e[m'"JFS (IBM filesystem): No"
+                        echo -e '\e[36m'"[5]" '\e(B\e[m'"JFS (IBM filesystem): No"
                     else
-                        echo -e '\e[36m'"[6]" '\e(B\e[m'"JFS (IBM filesystem): Yes"
+                        echo -e '\e[36m'"[5]" '\e(B\e[m'"JFS (IBM filesystem): Yes"
                     fi
-                    echo -e '\e[36m'"[7]" '\e(B\e[m'"Yes to all"
-                    echo -e '\e[36m'"[8]" '\e(B\e[m'"No to all"
+                    echo -e '\e[36m'"[6]" '\e(B\e[m'"Yes to all"
+                    echo -e '\e[36m'"[7]" '\e(B\e[m'"No to all"
                     echo
                     echo -e '\e[36m'"[0]" '\e(B\e[m'"Go back"
                     read -n 1 choice
@@ -487,25 +625,20 @@ pkgs(){
                             getzfs=$((1 - getzfs))
                             ;;
                         4)
-                            getf2fs=$((1 - getf2fs))
-                            ;;
-                        5)
                             getudf=$((1 - getudf))
                             ;;
-                        6)
+                        5)
                             getjfs=$((1 - getjfs))
                             ;;
-                        7)
+                        6)
                             getwinfs=1
-                            getf2fs=1
                             getapplefs=1
                             getjfs=1
                             getudf=1
                             getzfs=1
                             ;;
-                        8)
+                        7)
                             getwinfs=0
-                            getf2fs=0
                             getapplefs=0
                             getjfs=0
                             getudf=0
@@ -616,6 +749,9 @@ pkgs(){
             5)
                 gettimeshift=$((1 - gettimeshift))
                 ;;
+            6)
+                getclamav=$((1 - getclamav))
+                ;;
             0)
                 loop=0
                 ;;
@@ -629,7 +765,10 @@ sethostname(){
     clear
     valid=0
     while [[ $valid == 0 ]]; do
-        hname=$(gum input --prompt="Name your machine (letters, numbers and dashes): " --char-limit=32)
+        hname=$(gum input --prompt="Name your machine (letters, numbers and dashes): " --char-limit=32 --placeholder="archlinux")
+        if [[ "$hname" == "" ]]; then
+            hname="archlinux"
+        fi
         if [[ "$hname" =~ ^[a-zA-Z0-9-]+$ ]]; then
             valid=1
         else
@@ -792,10 +931,12 @@ intchk(){
                             iwctl station "$iface" connect "$ssid"
                             case $? in
                                 0)
-                                    echo "Connected successfully. The script will now restart."
-                                    sleep 2
+                                    echo
+                                    echo "Connected successfully. Waiting 10 seconds for network configuration to finish..."
+                                    echo "If the 'connection not found' error persists, you may attempt to continue anyway."
+                                    echo "Only do this if you are sure you have an internet connection!"
+                                    sleep 10
                                     iwlist=0
-                                    logout
                                     ;;
                                 *)
                                     clear
@@ -869,7 +1010,8 @@ bootent
 menu=1
 while [[ $menu == 1 ]]; do
     clear
-    echo "Region:                 $reg"
+    echo "Locale:                 $locale"
+    echo "Timezone:               $timezone"
     echo "Disk:                   $disk"
     case $manpart in
         0)
@@ -966,11 +1108,9 @@ echo "#!/bin/bash" > jdai-usr.sh
 chmod +x jdai-efi-2.sh
 chmod +x jdai-usr.sh
 
-# Set timezone (GB only)
-if [[ $reg == "GB" ]]; then
-    echo "ln -svf /usr/share/zoneinfo/Europe/London /etc/localtime" >> jdai-efi-2.sh
-    echo "hwclock --systohc" >> jdai-efi-2.sh
-fi
+# Set timezone
+echo "ln -svf /usr/share/zoneinfo/$timezone /etc/localtime" >> jdai-efi-2.sh
+echo "hwclock --systohc" >> jdai-efi-2.sh
 cat >> jdai-efi-2.sh << "EOF"
 # Generate locale
 locale-gen
@@ -984,10 +1124,7 @@ systemctl enable upower
 systemctl enable sddm
 systemctl enable lightdm
 systemctl enable wireplumber
-systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam
 systemctl enable fwupd-refresh.timer
-# Update clamav databases
-freshclam
 EOF
 # Create boot entry
 if [[ $uefiboot == 1 ]]; then
@@ -1006,12 +1143,12 @@ echo "su $uname -c ./jdai-usr.sh" >> jdai-efi-2.sh
 cat >> jdai-usr.sh << "EOF"
 # Clone and build yay
 sudo pacman -Syy
-git clone https://aur.archlinux.org/yay.git
-cd yay
+git clone https://aur.archlinux.org/yay-bin.git
+cd yay-bin
 makepkg -si --noconfirm
 #yay -S --noconfirm limine-entry-tool
 cd ..
-rm -rvf yay
+rm -rvf yay-bin
 EOF
 
 # Install selected extra packages
@@ -1028,9 +1165,6 @@ if [[ $getapplefs == 1 ]]; then
 fi
 if [[ $getzfs == 1 ]]; then
     extrapkgs="$extrapkgs zfs-utils"
-fi
-if [[ $getf2fs == 1 ]]; then
-    extrapkgs="$extrapkgs f2fs-tools"
 fi
 if [[ $getudf == 1 ]]; then
     extrapkgs="$extrapkgs udftools"
@@ -1053,12 +1187,19 @@ fi
 if [[ $gettimeshift == 1 ]]; then
     extrapkgs="$extrapkgs timeshift btrfs-assistant btrfsmaintenance"
 fi
+if [[ $getclamav == 1 ]]; then
+    extrapkgs="$extrapkgs clamav clamtk"
+fi
 if [[ $extrapkgs != "" ]]; then
     echo "yay -S --needed --noconfirm$extrapkgs" >> jdai-usr.sh
 fi
 if [[ $extrapkgs == *"docker"* ]]; then
     echo "sudo usermod -aG docker $uname" >> jdai-usr.sh
     echo "sudo systemctl enable docker" >> jdai-usr.sh
+fi
+if [[ $getclamav == 1 ]]; then
+    echo "systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam" >> jdai-usr.sh
+    echo "freshclam" > jdai-usr.sh
 fi
 # Install Plasma configuration files
 if [[ $profile == "Desktop (Plasma)" ]]; then
@@ -1086,7 +1227,7 @@ cp -v hyprland.conf ~/.config/hypr
 cp -v kitty.conf ~/.config/kitty
 sudo cp -v config.jsonc /etc/xdg/waybar
 sudo cp -v style.css /etc/xdg/waybar
-cd -v ..
+cd ..
 rm -rvf hyprconf
 EOF
 fi
@@ -1108,7 +1249,7 @@ mv -v ../xfce4-clipman-actions.xml .
 cp -v org.kde.discover.notifier.desktop ~/.config/autostart
 cp -v battery-13.rc ~/.config/xfce4/panel
 cp -v xfce4-clipman-actions.xml ~/.config/xfce4/panel
-cd -v ..
+cd ..
 rm -rvf xfceconf
 EOF
 fi
@@ -1196,7 +1337,7 @@ EOF
             echo " Type | Size"
             echo "------|----------------------------"
             echo " Boot | 256MB to 1GB"
-            echo " Swap | Same as your RAM size"
+            echo " Swap | Ideally the same as your RAM size (optional)"
             echo " Root | 8GB min, 32GB+ recommended"
             echo 
             echo "Press any key to open cfdisk."
@@ -1242,19 +1383,21 @@ EOF
             clear
             loop=1
             while [[ $loop == 1 ]]; do
-                swapno=$(gum input --prompt="Which partition number should be used for swap? ")
-                if [[ "$disk" == *"d"* ]]; then
-                    swap="${disk}${swapno}"
-                else
-                    swap="${disk}p${swapno}"
-                fi
-                if ! [[ -e "/dev/$swap" ]]; then
-                    clear
-                    echo
-                    echo "Partition /dev/$swap does not exist!"
-                    echo
-                else
-                    loop=0
+                swapno=$(gum input --prompt="Which partition number should be used for swap? (enter 0 to disable swap) ")
+                if [[ $swapno != 0 ]]; then
+                    if [[ "$disk" == *"d"* ]]; then
+                        swap="${disk}${swapno}"
+                    else
+                        swap="${disk}p${swapno}"
+                    fi
+                    if ! [[ -e "/dev/$swap" ]]; then
+                        clear
+                        echo
+                        echo "Partition /dev/$swap does not exist!"
+                        echo
+                    else
+                        loop=0
+                    fi
                 fi
             done
             loop=1
@@ -1279,7 +1422,11 @@ EOF
                 clear
                 echo "Root partition: /dev/$root"
                 echo "Boot partition: /dev/$boot"
-                echo "Swap partition: /dev/$swap"
+                if [[ $swapno != 0 ]]; then
+                    echo "Swap partition: /dev/$swap"
+                else
+                    echo "Swap partition: Disabled"
+                fi
                 case $formboot in
                     0)
                         echo "Format boot partition: No"
@@ -1351,19 +1498,19 @@ if [[ $formboot == 1 ]]; then
 fi
 # Mount ESP to /mnt/boot
 mount --mkdir /dev/$boot /mnt/boot -v
-# Format and activate swap partition
-mkswap /dev/$swap --verbose
-swapon /dev/$swap -v
+if [[ $swapno != 0 ]]; then
+    # Format and activate swap partition
+    mkswap /dev/$swap --verbose
+    swapon /dev/$swap -v
+fi
 # Install packages
 pacstrap -K /mnt $pkglist
 # Configure filesystem mount points
 genfstab -U /mnt >> /mnt/etc/fstab
 # Set language and keyboard layout
-echo "en_${reg}.UTF-8 UTF-8" > /mnt/etc/locale.gen
-echo "LANG=en_${reg}.UTF-8" > /mnt/etc/locale.conf
-if [[ $reg == "GB" ]]; then
-    echo "KEYMAP=uk" > /mnt/etc/vconsole.conf
-fi
+echo "${locale}.UTF-8 UTF-8" > /mnt/etc/locale.gen
+echo "LANG=${locale}.UTF-8" > /mnt/etc/locale.conf
+echo "KEYMAP=${keys}" > /mnt/etc/vconsole.conf
 # Set hostname
 echo $hname > /mnt/etc/hostname
 if [[ $uefiboot == 1 ]]; then
