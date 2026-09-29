@@ -1199,7 +1199,7 @@ if [[ $extrapkgs == *"docker"* ]]; then
 fi
 if [[ $getclamav == 1 ]]; then
     echo "systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam" >> jdai-usr.sh
-    echo "freshclam" > jdai-usr.sh
+    echo "freshclam" >> jdai-usr.sh
 fi
 # Install Plasma configuration files
 if [[ $profile == "Desktop (Plasma)" ]]; then
