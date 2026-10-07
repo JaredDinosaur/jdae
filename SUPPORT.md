@@ -112,7 +112,7 @@ As a Flatpak package - `flatpak install com.discordapp.Discord`
 
 Both package managers can be used to install several packages at once:\
 `yay -S <package1> <package2> <package3> <etc...>`\
-`flatpak install <package1> <package2> <package3> <etc...>`\
+`flatpak install <package1> <package2> <package3> <etc...>`
 
 > [!TIP]
 > After performing a full system upgrade or updating firmware, it is strongly recommended to reboot your system.\
@@ -128,6 +128,7 @@ Command | Description
 `flatpak search <term>` | Search for a package
 `yay -Syu` or just `yay` | Upgrade all packages
 `flatpak update` | Upgrade all packages
+`yay -Rns <package>` | Remove a package and all of its unused dependencies and files
 `yay -Scc` | Clear cache (this can free up disk space and solve some issues)
 `yay -Syy` | Synchronise package databases
 `sudo fwupdmgr refresh` | Check for new firmware updates
@@ -163,7 +164,7 @@ Command | Description
 Command | Description
 --- | ---
 `sudo <command>` | Run a command with admin permissions
-`man <command>` | Display help on how to use a command
+`man <program>` | Display help on how to use a command
 `clear` | Clear the screen
 `echo <text>` | Display text
 `fastfetch` | Display information about your machine
