@@ -129,6 +129,7 @@ Command | Description
 `yay -Syu` or just `yay` | Upgrade all packages
 `flatpak update` | Upgrade all packages
 `yay -Rns <package>` | Remove a package and all of its unused dependencies and files
+`yay -Qdtq` | List any unused or leftover packages
 `yay -Scc` | Clear cache (this can free up disk space and solve some issues)
 `yay -Syy` | Synchronise package databases
 `sudo fwupdmgr refresh` | Check for new firmware updates
