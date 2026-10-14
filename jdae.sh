@@ -461,6 +461,7 @@ pkgs(){
     mingb=$(awk -v num="$mindisk" 'BEGIN { print int((num / (1024^3)) + 0.5) }')
     set -e
 
+    kernel="linux"
     browser="Firefox"
     browserpkg="firefox firefox-i18n-uk firefox-ublock-origin"
     getwinfs=0
@@ -486,8 +487,9 @@ pkgs(){
         echo -e '\e[3m'"It's strongly recommended to select a GPU driver."'\e(B\e[m'
         echo -e '\e[3m'"-------------------------------------------------"'\e(B\e[m'
         echo
-        echo -e '\e[36m'"[1]" '\e(B\e[m'"Web browser: $browser"
-        echo -e '\e[36m'"[2]" '\e(B\e[m'"Filesystem utilities:"
+        echo -e '\e[36m'"[1]" '\e(B\e[m'"Kernel: $kernel"
+        echo -e '\e[36m'"[2]" '\e(B\e[m'"Web browser: $browser"
+        echo -e '\e[36m'"[3]" '\e(B\e[m'"Filesystem utilities:"
         if [[ $getwinfs == 0 ]]; then
             echo -e '\e[35m'"==>" '\e(B\e[m'"Windows filesystems (NTFS and exFAT): No"
         else
@@ -513,7 +515,7 @@ pkgs(){
         else
             echo -e '\e[35m'"==>" '\e(B\e[m'"JFS (IBM filesystem): Yes"
         fi
-        echo -e '\e[36m'"[3]" '\e(B\e[m'"Gaming packages:"
+        echo -e '\e[36m'"[4]" '\e(B\e[m'"Gaming packages:"
         if [[ $getsteam == 0 ]]; then
             echo -e '\e[35m'"==>" '\e(B\e[m'"Steam: No"
         else
@@ -529,22 +531,76 @@ pkgs(){
         else
             echo -e '\e[35m'"==>" '\e(B\e[m'"Winboat (run Windows apps on Linux): Yes"
         fi
-        echo -e '\e[36m'"[4]" '\e(B\e[m'"GPU Driver: $gpuconf"
+        echo -e '\e[36m'"[5]" '\e(B\e[m'"GPU Driver: $gpuconf"
         if [[ $gettimeshift == 0 ]]; then
-            echo -e '\e[36m'"[5]" '\e(B\e[m'"Timeshift (backup utility): No"
+            echo -e '\e[36m'"[6]" '\e(B\e[m'"Timeshift (backup utility): No"
         else
-            echo -e '\e[36m'"[5]" '\e(B\e[m'"Timeshift (backup utility): Yes"
+            echo -e '\e[36m'"[6]" '\e(B\e[m'"Timeshift (backup utility): Yes"
         fi
         if [[ $getclamav == 0 ]]; then
-            echo -e '\e[36m'"[6]" '\e(B\e[m'"ClamAV (antivirus + threat scanner): No"
+            echo -e '\e[36m'"[7]" '\e(B\e[m'"ClamAV (antivirus + threat scanner): No"
         else
-            echo -e '\e[36m'"[6]" '\e(B\e[m'"ClamAV (antivirus + threat scanner): Yes"
+            echo -e '\e[36m'"[7]" '\e(B\e[m'"ClamAV (antivirus + threat scanner): Yes"
         fi
         echo
         echo -e '\e[36m'"[0]" '\e(B\e[m'"Done"
         read -n 1 choice
         case $choice in
             1)
+                clear
+                choice=$(gum choose "Standard kernel (default)" "Zen kernel" "CachyOS kernel" "Hardened kernel" "Help" --header="Select a kernel:")
+                case $choice in
+                    "Standard kernel (default)")
+                        kernel="linux"
+                        ;;
+                    "Zen kernel")
+                        kernel="linux-zen"
+                        ;;
+                    "CachyOS kernel")
+                        clear
+                        echo -e '\e[3m'"You have chosen the CachyOS kernel."'\e(B\e[m'
+                        echo -e '\e[3m'"Using this kernel can noticeably improve your performance in games."'\e(B\e[m'
+                        echo -e '\e[3m'"However, it can also be unstable and unsupported by some software and hardware."'\e(B\e[m'
+                        choice=$(gum choose "I understand, continue" "No, choose another kernel" --header="Are you sure you want to use this kernel?")
+                        case $choice in
+                            "I understand, continue")
+                                kernel="linux-cachyos"
+                                ;;
+                            "No, keep my current kernel")
+                                ;;
+                            *)
+                                ;;
+                        esac
+                        ;;
+                    "Hardened kernel")
+                        kernel="linux-hardened"
+                        ;;
+                    "Help")
+                        clear
+                        echo -e '\e[3m'"Help page: Kernels"'\e(B\e[m'
+                        echo
+                        echo -e '\e[35m'"Standard Kernel"'\e(B\e[m'":"
+                        echo "The regular Linux kernel, extremely stable and best for general use."
+                        echo "It is strongly recommended to choose this option if you have no reason to use another kernel."
+                        echo
+                        echo -e '\e[35m'"Zen Kernel"'\e(B\e[m'":"
+                        echo "Like the standard kernel, but with optimisations focused towards desktop responsiveness."
+                        echo "Can make your experience smoother and improve game performance, but can use more power."
+                        echo
+                        echo -e '\e[35m'"CachyOS Kernel"'\e(B\e[m'":"
+                        echo "Has many optimisations specific to x86_64 CPUs which can greatly increase performance."
+                        echo "You may see higher FPS from using this kernel, but you may experience compatibility issues."
+                        echo
+                        echo -e '\e[35m'"Hardened Kernel"'\e(B\e[m'":"
+                        echo "Has extra mitigations for security exploits, which can prevent malware or cyberattacks."
+                        echo "Very good for a more secure system, but may cause compatibility and performance issues."
+                        echo
+                        echo -e '\e[3m'"Press any key to continue..."'\e(B\e[m'
+                        read -n 1
+                        ;;
+                esac
+                ;;
+            2)
                 clear
                 choice=$(gum choose "Firefox (default)" "Brave" "Vivaldi" "Zen Browser" "Helium Browser" "Mullvad Browser" "None" --header="Choose a web browser:")
                 case $choice in
@@ -578,7 +634,7 @@ pkgs(){
                         ;;
                 esac
                 ;;
-            2)
+            3)
                 submenu=1
                 while [[ $submenu == 1 ]]; do
                     clear
@@ -650,7 +706,7 @@ pkgs(){
                     esac
                 done
                 ;;
-            3)
+            4)
                 submenu=1
                 while [[ $submenu == 1 ]]; do
                     clear
@@ -702,7 +758,7 @@ pkgs(){
                     esac
                 done
                 ;;
-            4)
+            5)
                 submenu=1
                 while [[ $submenu == 1 ]]; do
                     clear
@@ -746,10 +802,10 @@ pkgs(){
                     esac
                 done
                 ;;
-            5)
+            6)
                 gettimeshift=$((1 - gettimeshift))
                 ;;
-            6)
+            7)
                 getclamav=$((1 - getclamav))
                 ;;
             0)
@@ -1149,7 +1205,19 @@ makepkg -si --noconfirm
 #yay -S --noconfirm limine-entry-tool
 cd ..
 rm -rvf yay-bin
+# Install chaotic-aur
+sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
+sudo pacman-key --lsign-key 3056513887B78AEB
+sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
+sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+echo "[chaotic-aur]" | sudo tee -a /etc/pacman.conf
+echo "Include = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf
+yay -Syy
+# Install an alternative kernel if selected
 EOF
+echo "if [[ $kernel != \"linux\" ]]; then" >> jdai-usr.sh
+echo "    yay -S --noconfirm $kernel $kernel-headers" >> jdai-usr.sh
+echo "fi" >> jdai-usr.sh
 
 # Install selected extra packages
 extrapkgs=""
@@ -1198,8 +1266,8 @@ if [[ $extrapkgs == *"docker"* ]]; then
     echo "sudo systemctl enable docker" >> jdai-usr.sh
 fi
 if [[ $getclamav == 1 ]]; then
-    echo "systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam" >> jdai-usr.sh
-    echo "freshclam" >> jdai-usr.sh
+    echo "sudo systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam" >> jdai-usr.sh
+    echo "sudo freshclam" >> jdai-usr.sh
 fi
 # Install Plasma configuration files
 if [[ $profile == "Desktop (Plasma)" ]]; then
@@ -1545,7 +1613,7 @@ esac
 echo "" >> /mnt/boot/limine.conf
 echo "/Arch Linux" >> /mnt/boot/limine.conf
 echo "    protocol: linux" >> /mnt/boot/limine.conf
-echo "    path: boot():/vmlinuz-linux" >> /mnt/boot/limine.conf
+echo "    path: boot():/vmlinuz-${kernel}" >> /mnt/boot/limine.conf
 case $crypt in
     0)
         echo "    cmdline: root=UUID=${uuid} zswap.enabled=0 rw rootfstype=${rootfs} quiet splash" >> /mnt/boot/limine.conf
@@ -1554,7 +1622,22 @@ case $crypt in
         echo "    cmdline: cryptdevice=UUID=${uuid}:root root=/dev/mapper/root rw rootfstype=${rootfs} quiet splash" >> /mnt/boot/limine.conf
         ;;
 esac
-echo "    module_path: boot():/initramfs-linux.img" >> /mnt/boot/limine.conf
+echo "    module_path: boot():/initramfs-${kernel}.img" >> /mnt/boot/limine.conf
+if [[ $kernel != "linux" ]]; then
+    echo "" >> /mnt/boot/limine.conf
+    echo "/Arch Linux (fallback kernel)" >> /mnt/boot/limine.conf
+    echo "    protocol: linux" >> /mnt/boot/limine.conf
+    echo "    path: boot():/vmlinuz-linux" >> /mnt/boot/limine.conf
+    case $crypt in
+        0)
+            echo "    cmdline: root=UUID=${uuid} zswap.enabled=0 rw rootfstype=${rootfs} quiet splash" >> /mnt/boot/limine.conf
+            ;;
+        1)
+            echo "    cmdline: cryptdevice=UUID=${uuid}:root root=/dev/mapper/root rw rootfstype=${rootfs} quiet splash" >> /mnt/boot/limine.conf
+            ;;
+    esac
+    echo "    module_path: boot():/initramfs-linux.img" >> /mnt/boot/limine.conf
+fi
 touch /mnt/etc/default/limine
 echo "ESP_PATH=/boot" >> /mnt/etc/default/limine
 # Edit pacman configuration
@@ -1718,7 +1801,7 @@ while [[ $loop == 1 ]]; do
             loop=0
             ;;
         "Enter the system (as your user)")
-            arch-chroot -u $uname /mnt
+            arch-chroot /mnt su $uname
             reboot
             loop=0
             ;;
