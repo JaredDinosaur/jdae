@@ -1,4 +1,11 @@
 #!/bin/bash
+
+logfile="/tmp/jdae.log"
+echo "Installation started: $(date)" > $logfile
+umount -Rv /mnt &>> $logfile
+swapoff -av &>> $logfile
+cryptsetup close -v /dev/mapper/root &>> $logfile
+
 setlocale(){
     loop=1
     clear
@@ -441,8 +448,9 @@ pkgs(){
     done
 
     clear
-    echo "Calculating the minimum required disk space..."
+    echo "==> Calculating the minimum required disk space..."
 
+    echo " -> Retrieving list of packages..."
     expkglist=$(
         for pkg in $pkglist; do
             if pacman -Sgq "$pkg" >/dev/null 2>&1; then
@@ -453,13 +461,14 @@ pkgs(){
         done | sort -u | xargs
     )
 
-    set +e
+    echo " -> Calculating total download size..."
     dlsize=$(pacman -Si $expkglist | awk '/Download Size/ {sum += $4 * ($5 == "MiB" ? 1024*1024 : $5 == "KiB" ? 1024 : 1)} END {print int(sum)}')
+    echo " -> Calculating total install size..."
     insize=$(pacman -Si $expkglist | awk '/Installed Size/ {sum += $4 * ($5 == "MiB" ? 1024*1024 : $5 == "KiB" ? 1024 : 1)} END {print int(sum)}')
+    echo " -> Calculating swap size..."
     ram=$(grep MemTotal /proc/meminfo | awk '{print $2 * 1024}')
     mindisk=$((dlsize+insize+ram+9487198679))
     mingb=$(awk -v num="$mindisk" 'BEGIN { print int((num / (1024^3)) + 0.5) }')
-    set -e
 
     kernel="linux"
     browser="Firefox"
@@ -878,6 +887,9 @@ user(){
     done
     clear
     fullname=$(gum input --prompt="Enter your user's full name (can be multiple words): ")
+    if [[ $fullname == "" ]]; then
+        fullname=$uname
+    fi
     clear
     valid=0
     while [[ $valid == 0 ]]; do
@@ -1022,6 +1034,301 @@ intchk(){
     fi
 }
 
+echolr(){
+    coll=$1
+    left=$2
+    colr=$3
+    right=$4
+    width=$(($(tput cols)-(${#left}+${#right})))
+    blank=$(printf "%${width}s\n")
+    echo -e "${coll}${left}\e(B\e[m${blank}${colr}${right}\e(B\e[m"
+}
+
+quickins(){
+    insmode=$1
+    case $insmode in
+        "Desktop")
+            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools power-profiles-daemon man-db man-pages sl wget bash-completion fwupd fd parallel"
+            profile="Desktop (Plasma)"
+            ;;
+        "Gaming")
+            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools power-profiles-daemon man-db man-pages sl wget bash-completion fwupd fd parallel"
+            profile="Desktop (Plasma)"
+            ;;
+        "Security")
+            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies xdg-user-dirs gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd fd parallel"
+            profile="Desktop (Xfce)"
+            loop=0
+            ;;
+        "Lightweight")
+            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc vlc-plugins-all iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel"
+            profile="Desktop (LXQt)"
+            loop=0
+            ;;
+    esac
+
+    clear
+    echo "==> Calculating the minimum required disk space..."
+
+    echo " -> Retrieving list of packages..."
+    expkglist=$(
+        for pkg in $pkglist; do
+            if pacman -Sgq "$pkg" >/dev/null 2>&1; then
+                pacman -Sgq "$pkg"
+            else
+                printf '%s\n' "$pkg"
+            fi
+        done | sort -u | xargs
+    )
+
+    echo " -> Calculating total download size..."
+    dlsize=$(pacman -Si $expkglist | awk '/Download Size/ {sum += $4 * ($5 == "MiB" ? 1024*1024 : $5 == "KiB" ? 1024 : 1)} END {print int(sum)}')
+    echo " -> Calculating total install size..."
+    insize=$(pacman -Si $expkglist | awk '/Installed Size/ {sum += $4 * ($5 == "MiB" ? 1024*1024 : $5 == "KiB" ? 1024 : 1)} END {print int(sum)}')
+    echo " -> Calculating swap size..."
+    ram=$(grep MemTotal /proc/meminfo | awk '{print $2 * 1024}')
+    mindisk=$((dlsize+insize+ram+9487198679))
+    mingb=$(awk -v num="$mindisk" 'BEGIN { print int((num / (1024^3)) + 0.5) }')
+
+    case $insmode in
+        "Desktop")
+            kernel="linux-zen"
+            browser="Firefox"
+            browserpkg="firefox firefox-i18n-uk firefox-ublock-origin"
+            getwinfs=1
+            getapplefs=0
+            getjfs=0
+            getudf=0
+            getzfs=0
+            getsteam=0
+            getlutris=0
+            getwinboat=0
+            getbottles=0
+            gettimeshift=1
+            getclamav=1
+            ;;
+        "Gaming")
+            kernel="linux-cachyos"
+            browser="Firefox"
+            browserpkg="firefox firefox-i18n-uk firefox-ublock-origin"
+            getwinfs=1
+            getapplefs=0
+            getjfs=0
+            getudf=0
+            getzfs=0
+            getsteam=1
+            getlutris=1
+            getwinboat=1
+            getbottles=1
+            gettimeshift=1
+            getclamav=1
+            ;;
+        "Lightweight")
+            kernel="linux"
+            browser="Firefox"
+            browserpkg="firefox firefox-i18n-uk firefox-ublock-origin"
+            getwinfs=0
+            getapplefs=0
+            getjfs=0
+            getudf=0
+            getzfs=0
+            getsteam=0
+            getlutris=0
+            getwinboat=0
+            getbottles=0
+            gettimeshift=0
+            getclamav=0
+            ;;
+        "Security")
+            kernel="linux-hardened"
+            browser="Mullvad Browser"
+            browserpkg="mullvad-browser-bin firefox-ublock-origin"
+            getwinfs=1
+            getapplefs=1
+            getjfs=1
+            getudf=1
+            getzfs=1
+            getsteam=0
+            getlutris=0
+            getwinboat=0
+            getbottles=0
+            gettimeshift=1
+            getclamav=1
+            ;;
+    esac
+
+    submenu=1
+    while [[ $submenu == 1 ]]; do
+        clear
+        echo -e '\e[3m'"Select your graphics card driver."'\e(B\e[m'
+        echo -e '\e[3m'"For Nvidia, open source drivers are better for more recent cards (GTX 1650 or newer)."'\e(B\e[m'
+        echo -e '\e[3m'"If your machine has no graphics card, select your CPU manufacturer."'\e(B\e[m'
+        choice=$(gum choose "Intel" "AMD (Radeon)" "Nvidia (Open Source)" "Nvidia (Proprietary)" "No Driver" --header="")
+        case $choice in
+            "Intel")
+                gpudrv=1
+                gpupkg="vulkan-intel xf86-video-intel lib32-vulkan-intel"
+                gpuconf="Intel"
+                submenu=0
+                ;;
+            "AMD (Radeon)")
+                gpudrv=1
+                gpupkg="vulkan-radeon xf86-video-amdgpu lib32-vulkan-radeon"
+                gpuconf="AMD (Radeon)"
+                submenu=0
+                ;;
+            "Nvidia (Open Source)")
+                gpudrv=1
+                gpupkg="vulkan-nouveau xf86-video-nouveau lib32-vulkan-nouveau nvidia-utils nvidia-open-dkms lib32-nvidia-utils nvidia-settings"
+                gpuconf="Nvidia (Open Source)"
+                submenu=0
+                ;;
+            "Nvidia (Proprietary)")
+                gpudrv=1
+                gpupkg="vulkan-nouveau xf86-video-nouveau lib32-vulkan-nouveau nvidia-utils nvidia-dkms lib32-nvidia-utils nvidia-settings"
+                gpuconf="Nvidia (Proprietary)"
+                submenu=0
+                ;;
+            "No Driver")
+                gpudrv=0
+                gpupkg=""
+                gpuconf="None"
+                submenu=0
+                ;;
+            *)
+                ;;
+        esac
+    done
+
+    loop=1
+    clear
+    while [[ $loop == 1 ]]; do
+        echo "Available disks:"
+        echo
+        # List available disks
+        #lsblk -d -o NAME,SIZE,LABEL
+        hwinfo --disk --short
+        echo
+        echo "Recommended minimum disk space: 64GB for VMs, 128GB for real hardware"
+        disk=$(gum input --prompt="The disk to install to is /dev/___: ")
+
+        # Check that disk exists and is writable
+        if ! [[ -b /dev/$disk ]]; then
+            clear
+            echo
+            echo "Disk /dev/$disk does not exist!"
+            echo
+        else
+            if ! [[ -w /dev/$disk ]]; then
+                clear
+                echo
+                echo "Disk /dev/$disk is not writable!"
+                echo "Check that the disk is not in use!"
+                echo
+            else
+                disksize=$(blockdev --getsize64 /dev/$disk)
+                if (( $disksize < $mindisk )); then
+                    echo
+                    echo -e '\e[31m'"WARNING: This disk is too small for your selected set of packages!"'\e(B\e[m'
+                    echo -e '\e[31m'"The minimum required disk size for your set of packages is ${mingb}GB!"
+                    echo -e '\e[31m'"It is very likely that you will encounter errors during installation!"
+                    echo -e '\e[31m'"Choose another set of packages if you cannot use another disk!"
+                fi
+                echo
+                echo -e '\e[3m'"The contents of disk /dev/$disk will be changed or erased!"'\e(B\e[m'
+                echo -e '\e[3m'"Double check that you have selected the correct disk!"'\e(B\e[m'
+                choice=$(gum choose "I understand, continue" "Choose another disk" "Cancel the installation (power off)" --header="Are you sure you want to continue?")
+                case $choice in
+                    "I understand, continue")
+                        loop=0
+                        ;;
+                    "Cancel the installation (power off)")
+                        poweroff
+                        exit 1
+                        ;;
+                    *)
+                        clear
+                        ;;
+                esac
+            fi
+        fi
+    done
+
+    rootno=3
+    bootno=1
+    swapno=2
+    formboot=1
+    manpart=0
+
+    case $insmode in
+        "Desktop")
+            rootfs="ext4"
+            crypt=0
+            ;;
+        "Gaming")
+            rootfs="xfs"
+            crypt=0
+            ;;
+        "Lightweight")
+            rootfs="f2fs"
+            crypt=0
+            ;;
+        "Security")
+            rootfs="btrfs"
+            crypt=1
+            ;;
+    esac
+
+    sethostname
+
+    clear
+    valid=0
+    while [[ $valid == 0 ]]; do
+        uname=$(gum input --prompt="Name your user (single word, lowercase): " --char-limit=32)
+        if [[ "$uname" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
+            valid=1
+        else
+            clear
+            echo "Invalid username!"
+        fi
+    done
+    clear
+    fullname=$(gum input --prompt="Enter your user's full name (can be multiple words): ")
+    if [[ $fullname == "" ]]; then
+        fullname=$uname
+    fi
+    clear
+    valid=0
+    while [[ $valid == 0 ]]; do
+        pass=$(gum input --prompt="Enter your password: " --password)
+        if [[ $pass == "" ]]; then
+            clear
+            echo "Password cannot be blank!"
+            echo
+        else
+            clear
+            passconf=$(gum input --prompt="Confirm password: " --password)
+            if [[ $passconf == $pass ]]; then
+                clear
+                printf -v star '%*s' "${#pass}" ''
+                star=${star// /*}
+                valid=1
+            else
+                clear
+                echo "Passwords do not match!"
+                echo
+            fi
+        fi
+    done
+    cryptpass=$pass
+    rootpass=$pass
+    cryptstar=$star
+    rootstar=$star
+    bootmenu=0
+    biosboot=1
+    uefiboot=1
+}
+
 clear
 setlocale
 # Check boot mode
@@ -1053,14 +1360,33 @@ sed -i "s/#Color/Color/" /etc/pacman.conf
 sed -i "s/ParallelDownloads = 5/ParallelDownloads = 1/" /etc/pacman.conf
 sed -i "s/#NoProgressBar/ILoveCandy/" /etc/pacman.conf
 
-set -euo pipefail
-
-# Get options
-pkgs
-diskpart
-sethostname
-user
-bootent
+clear
+choice=$(gum choose "Standard installation" "Quick install (Desktop)" "Quick install (Gaming)" "Quick install (Lightweight)" "Quick install (Security)" --header "Choose an installation option:")
+if [[ $? != 0 ]]; then
+    exit 1
+fi
+case $choice in
+    "Standard installation")
+        # Get options
+        pkgs
+        diskpart
+        sethostname
+        user
+        bootent
+        ;;
+    "Quick install (Desktop)")
+        quickins Desktop
+        ;;
+    "Quick install (Gaming)")
+        quickins Gaming
+        ;;
+    "Quick install (Lightweight)")
+        quickins Lightweight
+        ;;
+    "Quick install (Security)")
+        quickins Security
+        ;;
+esac
 
 # Show options and ask for confirmation
 menu=1
@@ -1158,65 +1484,160 @@ while [[ $menu == 1 ]]; do
     esac
 done
 
-# Make child scripts executable
+# Make child scripts executable and add echolr function
 echo "#!/bin/bash" > jdai-efi-2.sh
 echo "#!/bin/bash" > jdai-usr.sh
 chmod +x jdai-efi-2.sh
 chmod +x jdai-usr.sh
+cat >> jdai-efi-2.sh << "EOF"
+echolr(){
+    coll=$1
+    left=$2
+    colr=$3
+    right=$4
+    width=$(($(tput cols)-(${#left}+${#right})))
+    blank=$(printf "%${width}s\n")
+    echo -e "${coll}${left}\e(B\e[m${blank}${colr}${right}\e(B\e[m"
+}
+EOF
+cat >> jdai-usr.sh << "EOF"
+echolr(){
+    coll=$1
+    left=$2
+    colr=$3
+    right=$4
+    width=$(($(tput cols)-(${#left}+${#right})))
+    blank=$(printf "%${width}s\n")
+    echo -e "${coll}${left}\e(B\e[m${blank}${colr}${right}\e(B\e[m"
+}
+EOF
 
 # Set timezone
-echo "ln -svf /usr/share/zoneinfo/$timezone /etc/localtime" >> jdai-efi-2.sh
-echo "hwclock --systohc" >> jdai-efi-2.sh
+echo "ln -svf /usr/share/zoneinfo/$timezone /etc/localtime &>> $logfile" >> jdai-efi-2.sh
+echo "hwclock --systohc &>> $logfile" >> jdai-efi-2.sh
 cat >> jdai-efi-2.sh << "EOF"
+mkdir -p /tmp
+touch /tmp/jdae.log
 # Generate locale
-locale-gen
+echolr "\e[36m" "Generating locale..." "" "In progress"
+locale-gen &>> /tmp/jdae.log
+tput cuu 1
+echolr "\e[36m" "Generating locale..." "\e[32m" "Done"
 # Generate initramfs
-mkinitcpio -vP
+echolr "\e[36m" "Generating initramfs..." "" "Starting build"
+mkinitcpio -vP 2>&1 | while IFS= read -r line; do
+EOF
+echo "    echo \"\$line\" >> ~/jdae.log" >> jdai-efi-2.sh
+echo "    if [[ \"\$line\" == *\"build hook\"* ]]; then" >> jdai-efi-2.sh
+echo "        tput cuu 1" >> jdai-efi-2.sh
+echo "        echolr \"\e[36m\" \"Generating initramfs...\" \"\" \"\$line\"" >> jdai-efi-2.sh
+echo "    fi" >> jdai-efi-2.sh
+echo "    if [[ \"\$line\" == *\"==>\"* ]]; then" >> jdai-efi-2.sh
+echo "        tput cuu 1" >> jdai-efi-2.sh
+echo "        echolr \"\e[36m\" \"Generating initramfs...\" \"\" \"\$line\"" >> jdai-efi-2.sh
+echo "    fi" >> jdai-efi-2.sh
+cat >> jdai-efi-2.sh << "EOF"
+done
+tput cuu 1
+echolr "\e[36m" "Generating initramfs..." "\e[32m" "Done"
+echolr "\e[36m" "Enabling system services..." "" "In progress"
 # Enable system services
-systemctl enable ip6tables iptables iwd NetworkManager-dispatcher NetworkManager systemd-network-generator systemd-networkd wpa_supplicant
-systemctl enable accounts-daemon
-systemctl enable udisks2
-systemctl enable upower
-systemctl enable sddm
-systemctl enable lightdm
-systemctl enable wireplumber
-systemctl enable fwupd-refresh.timer
+systemctl enable ip6tables iptables iwd NetworkManager-dispatcher NetworkManager systemd-network-generator systemd-networkd wpa_supplicant &>> /tmp/jdae.log
+systemctl enable accounts-daemon &>> /tmp/jdae.log
+systemctl enable udisks2 &>> /tmp/jdae.log
+systemctl enable upower &>> /tmp/jdae.log
+systemctl enable sddm &>> /tmp/jdae.log
+systemctl enable lightdm &>> /tmp/jdae.log
+systemctl enable wireplumber &>> /tmp/jdae.log
+systemctl enable fwupd-refresh.timer &>> /tmp/jdae.log
+tput cuu 1
+echolr "\e[36m" "Enabling system services..." "\e[32m" "Done"
+echolr "\e[36m" "Setting up bootloader..." "" "In progress"
 EOF
 # Create boot entry
 if [[ $uefiboot == 1 ]]; then
-    echo "efibootmgr --create --disk /dev/${disk} --part 1 --label \"Arch Linux\" --loader '\\BOOTX64.EFI' --unicode" >> jdai-efi-2.sh
+    echo "tput cuu 1" >> jdai-efi-2.sh
+    echo "echolr \"\e[36m\" \"Setting up bootloader...\" \"\" \"Creating UEFI boot entry\"" >> jdai-efi-2.sh
+    echo "efibootmgr --create --disk /dev/${disk} --part 1 --label \"Arch Linux\" --loader '\\EFI\\BOOTX64.EFI' --unicode &>> $logfile" >> jdai-efi-2.sh
 fi
 if [[ $biosboot == 1 ]]; then
-    echo "limine bios-install /dev/$disk" >> jdai-efi-2.sh
+    echo "tput cuu 1" >> jdai-efi-2.sh
+    echo "echolr \"\e[36m\" \"Setting up bootloader...\" \"\" \"Creating BIOS boot entry\"" >> jdai-efi-2.sh
+    echo "limine bios-install /dev/$disk &>> $logfile" >> jdai-efi-2.sh
 fi
+echo "tput cuu 1" >> jdai-efi-2.sh
+echo "echolr \"\e[36m\" \"Setting up bootloader...\" \"\e[32m\" \"Done\"" >> jdai-efi-2.sh
 # Copy child scripts
-echo "cp -v jdai-usr.sh /home/$uname" >> jdai-efi-2.sh
+echo "cp -v jdai-usr.sh /home/$uname &>> $logfile" >> jdai-efi-2.sh
 # Switch to newly created user
 echo "cd /home/$uname" >> jdai-efi-2.sh
 # Run child script as new user
 echo "su $uname -c ./jdai-usr.sh" >> jdai-efi-2.sh
+echo "if [[ \$? != 0 ]]; then" >> jdai-efi-2.sh
+echo "    exit 1" >> jdai-efi-2.sh
+echo "fi" >> jdai-efi-2.sh
 
 cat >> jdai-usr.sh << "EOF"
 # Clone and build yay
-sudo pacman -Syy
-git clone https://aur.archlinux.org/yay-bin.git
+echolr "\e[36m" "Installing yay..." "" "Synchronising package databases"
+sudo pacman -Syy &>> ~/jdae.log
+tput cuu 1
+echolr "\e[36m" "Installing yay..." "" "Cloning AUR repo"
+git clone https://aur.archlinux.org/yay-bin.git &>> ~/jdae.log
 cd yay-bin
-makepkg -si --noconfirm
-#yay -S --noconfirm limine-entry-tool
+tput cuu 1
+echolr "\e[36m" "Installing yay..." "" "Building package"
+makepkg -si --noconfirm &>> ~/jdae.log
 cd ..
-rm -rvf yay-bin
+tput cuu 1
+echolr "\e[36m" "Installing yay..." "" "Cleaning up"
+rm -rvf yay-bin &>> ~/jdae.log
+tput cuu 1
+echolr "\e[36m" "Installing yay..." "\e[32m" "Done"
 # Install chaotic-aur
-sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
-sudo pacman-key --lsign-key 3056513887B78AEB
-sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-echo "[chaotic-aur]" | sudo tee -a /etc/pacman.conf
-echo "Include = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf
-yay -Syy
+echolr "\e[36m" "Installing chaotic-aur..." "" "Retrieving key"
+sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com &>> ~/jdae.log
+tput cuu 1
+echolr "\e[36m" "Installing chaotic-aur..." "" "Signing key"
+sudo pacman-key --lsign-key 3056513887B78AEB &>> ~/jdae.log
+tput cuu 1
+echolr "\e[36m" "Installing chaotic-aur..." "" "Installing keyring"
+sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' &>> ~/jdae.log
+tput cuu 1
+echolr "\e[36m" "Installing chaotic-aur..." "" "Installing mirror list"
+sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' &>> ~/jdae.log
+echo "[chaotic-aur]" | sudo tee -a /etc/pacman.conf &>/dev/null
+echo "Include = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf &>/dev/null
+tput cuu 1
+echolr "\e[36m" "Installing chaotic-aur..." "" "Synchronising package databases"
+yay -Syy &>> ~/jdae.log
+tput cuu 1
+echolr "\e[36m" "Installing chaotic-aur..." "\e[32m" "Done"
 # Install an alternative kernel if selected
 EOF
 echo "if [[ $kernel != \"linux\" ]]; then" >> jdai-usr.sh
-echo "    yay -S --noconfirm $kernel $kernel-headers" >> jdai-usr.sh
+echo "    echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\" \"In progress\"" >> jdai-usr.sh
+echo "    yay -S --noconfirm $kernel $kernel-headers  2>&1 | while IFS= read -r line; do" >> jdai-usr.sh
+echo "    echo \"\$line\" >> ~/jdae.log" >> jdai-usr.sh
+echo "    if [[ \"\$line\" == *\"downloading...\"* ]]; then" >> jdai-usr.sh
+echo "        tput cuu 1" >> jdai-usr.sh
+echo "        echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\" \"\$line\"" >> jdai-usr.sh
+echo "    fi" >> jdai-usr.sh
+echo "    if [[ \"\$line\" == *\"installing\"*\"...\"* ]]; then" >> jdai-usr.sh
+echo "        tput cuu 1" >> jdai-usr.sh
+echo "        echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\" \"\$line\"" >> jdai-usr.sh
+echo "    fi" >> jdai-usr.sh
+echo "    if [[ \"\$line\" == *\"(\"*\"/\"*\")\"* ]]; then" >> jdai-usr.sh
+echo "        tput cuu 1" >> jdai-usr.sh
+echo "        echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\" \"\$line\"" >> jdai-usr.sh
+echo "    fi" >> jdai-usr.sh
+echo "    if [[ \"$line\" == *\"==>\"* ]]; then" >> jdai-usr.sh
+echo "        tput cuu 1" >> jdai-usr.sh
+echo "        echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\" \"\$line\"" >> jdai-usr.sh
+echo "    fi" >> jdai-usr.sh
+echo "done" >> jdai-usr.sh
+echo "    tput cuu 1" >> jdai-usr.sh
+echo "    echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\e[32m\" \"Done\"" >> jdai-usr.sh
 echo "fi" >> jdai-usr.sh
 
 # Install selected extra packages
@@ -1259,68 +1680,108 @@ if [[ $getclamav == 1 ]]; then
     extrapkgs="$extrapkgs clamav clamtk"
 fi
 if [[ $extrapkgs != "" ]]; then
-    echo "yay -S --needed --noconfirm$extrapkgs" >> jdai-usr.sh
+    echo "echolr \"\e[36m\" \"Installing additional packages...\" \"\" \"Preparing to install\"" >> jdai-usr.sh
+    echo "yay -S --needed --noconfirm$extrapkgs 2>&1 | while IFS= read -r line; do" >> jdai-usr.sh
+    echo "    echo \"\$line\" >> ~/jdae.log" >> jdai-usr.sh
+    echo "    if [[ \"\$line\" == *\"downloading...\"* ]]; then" >> jdai-usr.sh
+    echo "        tput cuu 1" >> jdai-usr.sh
+    echo "        echolr \"\e[36m\" \"Installing additional packages...\" \"\" \"\$line\"" >> jdai-usr.sh
+    echo "    fi" >> jdai-usr.sh
+    echo "    if [[ \"\$line\" == *\"installing\"*\"...\"* ]]; then" >> jdai-usr.sh
+    echo "        tput cuu 1" >> jdai-usr.sh
+    echo "        echolr \"\e[36m\" \"Installing additional packages...\" \"\" \"\$line\"" >> jdai-usr.sh
+    echo "    fi" >> jdai-usr.sh
+    echo "    if [[ \"\$line\" == *\"(\"*\"/\"*\")\"* ]]; then" >> jdai-usr.sh
+    echo "        tput cuu 1" >> jdai-usr.sh
+    echo "        echolr \"\e[36m\" \"Installing additional packages...\" \"\" \"\$line\"" >> jdai-usr.sh
+    echo "    fi" >> jdai-usr.sh
+    echo "    if [[ \"$line\" == *\"==>\"* ]]; then" >> jdai-usr.sh
+    echo "        tput cuu 1" >> jdai-usr.sh
+    echo "        echolr \"\e[36m\" \"Installing additional packages...\" \"\" \"\$line\"" >> jdai-usr.sh
+    echo "    fi" >> jdai-usr.sh
+    echo "done" >> jdai-usr.sh
+    echo "tput cuu 1" >> jdai-usr.sh
+    echo "echolr \"\e[36m\" \"Installing additional packages...\" \"\e[32m\" \"Done\"" >> jdai-usr.sh
 fi
 if [[ $extrapkgs == *"docker"* ]]; then
-    echo "sudo usermod -aG docker $uname" >> jdai-usr.sh
-    echo "sudo systemctl enable docker" >> jdai-usr.sh
+    echo "echolr \"\e[36m\" \"Enabling Docker...\" \"\" \"In progress\"" >> jdai-usr.sh
+    echo "sudo usermod -aG docker $uname &>> ~/jdae.log" >> jdai-usr.sh
+    echo "sudo systemctl enable docker &>> ~/jdae.log" >> jdai-usr.sh
+    echo "tput cuu 1" >> jdai-usr.sh
+    echo "echolr \"\e[36m\" \"Enabling Docker...\" \"\e[32m\" \"Done\"" >> jdai-usr.sh
 fi
 if [[ $getclamav == 1 ]]; then
-    echo "sudo systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam" >> jdai-usr.sh
-    echo "sudo freshclam" >> jdai-usr.sh
+    echo "echolr \"\e[36m\" \"Enabling ClamAV...\" \"\" \"Enabling system services\"" >> jdai-usr.sh
+    echo "sudo systemctl enable clamav-clamonacc clamav-daemon clamav-freshclam &>> ~/jdae.log" >> jdai-usr.sh
+    echo "tput cuu 1" >> jdai-usr.sh
+    echo "echolr \"\e[36m\" \"Enabling ClamAV...\" \"\" \"Updating protection databases\"" >> jdai-usr.sh
+    echo "sudo freshclam &>> ~/jdae.log" >> jdai-usr.sh
+    echo "tput cuu 1" >> jdai-usr.sh
+    echo "echolr \"\e[36m\" \"Enabling ClamAV...\" \"\e[32m\" \"Done\"" >> jdai-usr.sh
 fi
 # Install Plasma configuration files
 if [[ $profile == "Desktop (Plasma)" ]]; then
     cat >> jdai-usr.sh << "EOF"
-git clone https://github.com/JaredDinosaur/plasmaconf
+echolr "\e[36m" "Configuring the desktop environment..." "" "In progress"
+git clone https://github.com/JaredDinosaur/plasmaconf &>> ~/jdae.log
 cd plasmaconf
-mv -v kde_settings.conf ..
-cp -v ./* ~/.config
-mv -v ../kde_settings.conf .
-sudo cp -v kde_settings.conf /etc/sddm.conf.d
-sudo mv -v /etc/sddm.conf.d /etc/sddm.conf
-yay -R --noconfirm plasma-bigscreen
+mv -v kde_settings.conf .. &>> ~/jdae.log
+cp -v ./* ~/.config &>> ~/jdae.log
+mv -v ../kde_settings.conf . &>> ~/jdae.log
+sudo cp -v kde_settings.conf /etc/sddm.conf.d &>> ~/jdae.log
+sudo mv -v /etc/sddm.conf.d /etc/sddm.conf &>> ~/jdae.log
+yay -R --noconfirm plasma-bigscreen &>> ~/jdae.log
 cd ..
-rm -rvf plasmaconf
+rm -rvf plasmaconf &>> ~/jdae.log
+tput cuu 1
+echolr "\e[36m" "Configuring the desktop environment..." "\e[32m" "Done"
 EOF
 fi
 # Install Hyprland configuration files
 if [[ $profile == "Desktop (Hyprland)" ]]; then
     cat >> jdai-usr.sh << "EOF"
-git clone https://github.com/JaredDinosaur/hyprconf
+echolr "\e[36m" "Configuring the desktop environment..." "" "In progress"
+git clone https://github.com/JaredDinosaur/hyprconf &>> ~/jdae.log
 cd hyprconf
-mkdir -vp ~/.config/hypr
-mkdir -vp ~/.config/kitty
-cp -v hyprland.conf ~/.config/hypr
-cp -v kitty.conf ~/.config/kitty
-sudo cp -v config.jsonc /etc/xdg/waybar
-sudo cp -v style.css /etc/xdg/waybar
+mkdir -vp ~/.config/hypr &>> ~/jdae.log
+mkdir -vp ~/.config/kitty &>> ~/jdae.log
+cp -v hyprland.conf ~/.config/hypr &>> ~/jdae.log
+cp -v kitty.conf ~/.config/kitty &>> ~/jdae.log
+sudo cp -v config.jsonc /etc/xdg/waybar &>> ~/jdae.log
+sudo cp -v style.css /etc/xdg/waybar &>> ~/jdae.log
 cd ..
-rm -rvf hyprconf
+rm -rvf hyprconf &>> ~/jdae.log
+tput cuu 1
+echolr "\e[36m" "Configuring the desktop environment..." "\e[32m" "Done"
 EOF
 fi
 # Install Xfce configuration files
 if [[ $profile == "Desktop (Xfce)" ]]; then
     cat >> jdai-usr.sh << "EOF"
-git clone https://github.com/JaredDinosaur/xfceconf
+echolr "\e[36m" "Configuring the desktop environment..." "" "In progress"
+git clone https://github.com/JaredDinosaur/xfceconf &>> ~/jdae.log
 cd xfceconf
-mv -v org.kde.discover.notifier.desktop ..
-mv -v battery-13.rc ..
-mv -v xfce4-clipman-actions.xml ..
-mkdir -vp ~/.config/autostart
-mkdir -vp ~/.config/xfce4/panel
-mkdir -vp ~/.config/xfce4/xfconf/xfce-perchannel-xml
-cp -v ./* ~/.config/xfce4/xfconf/xfce-perchannel-xml
-mv -v ../org.kde.discover.notifier.desktop .
-mv -v ../battery-13.rc .
-mv -v ../xfce4-clipman-actions.xml .
-cp -v org.kde.discover.notifier.desktop ~/.config/autostart
-cp -v battery-13.rc ~/.config/xfce4/panel
-cp -v xfce4-clipman-actions.xml ~/.config/xfce4/panel
+mv -v org.kde.discover.notifier.desktop .. &>> ~/jdae.log
+mv -v battery-13.rc .. &>> ~/jdae.log
+mv -v xfce4-clipman-actions.xml .. &>> ~/jdae.log
+mkdir -vp ~/.config/autostart &>> ~/jdae.log
+mkdir -vp ~/.config/xfce4/panel &>> ~/jdae.log
+mkdir -vp ~/.config/xfce4/xfconf/xfce-perchannel-xml &>> ~/jdae.log
+cp -v ./* ~/.config/xfce4/xfconf/xfce-perchannel-xml &>> ~/jdae.log
+mv -v ../org.kde.discover.notifier.desktop . &>> ~/jdae.log
+mv -v ../battery-13.rc . &>> ~/jdae.log
+mv -v ../xfce4-clipman-actions.xml . &>> ~/jdae.log
+cp -v org.kde.discover.notifier.desktop ~/.config/autostart &>> ~/jdae.log
+cp -v battery-13.rc ~/.config/xfce4/panel &>> ~/jdae.log
+cp -v xfce4-clipman-actions.xml ~/.config/xfce4/panel &>> ~/jdae.log
 cd ..
-rm -rvf xfceconf
+rm -rvf xfceconf &>> ~/jdae.log
+tput cuu 1
+echolr "\e[36m" "Configuring the desktop environment..." "\e[32m" "Done"
 EOF
 fi
+
+echo "cat ~/jdae.log | sudo tee -a /tmp/jdae.log &>/dev/null" >> jdai-usr.sh
 
 ## Scan for other boot entries
 #if [[ $bootmenu == 1 ]]; then
@@ -1336,19 +1797,19 @@ case $manpart in
         clear
         echo "Starting installation in 5 seconds..."
         sleep 1
-        clear
+        tput cuu 1
         echo "Starting installation in 4 seconds..."
         sleep 1
-        clear
+        tput cuu 1
         echo "Starting installation in 3 seconds..."
         sleep 1
-        clear
+        tput cuu 1
         echo "Starting installation in 2 seconds..."
         sleep 1
-        clear
+        tput cuu 1
         echo "Starting installation in 1 second..."
         sleep 1
-        clear
+        tput cuu 1
         # Handles different partition names (sda/vda vs nvme/mmcblk)
         if [[ "$disk" == *"d"* ]]; then
             root="${disk}${rootno}"
@@ -1394,6 +1855,9 @@ p
 
 w
 EOF
+if [[ $? != 0 ]]; then
+    exit 1
+fi
         ;;
     1)
         menu=1
@@ -1524,55 +1988,358 @@ EOF
         clear
         echo "Starting installation in 5 seconds..."
         sleep 1
-        clear
+        tput cuu 1
         echo "Starting installation in 4 seconds..."
         sleep 1
-        clear
+        tput cuu 1
         echo "Starting installation in 3 seconds..."
         sleep 1
-        clear
+        tput cuu 1
         echo "Starting installation in 2 seconds..."
         sleep 1
-        clear
+        tput cuu 1
         echo "Starting installation in 1 second..."
         sleep 1
-        clear
+        tput cuu 1
         ;;
 esac
+
+clear
+echo -e '\e[37m'"A log is available at $logfile with full installation details."'\e(B\e[m'
 
 case $crypt in
     0)
         # Format root partition (no encryption)
+        echolr "\e[36m" "Formatting disk..." "" "Formatting root partition"
         if [[ $rootfs == "ext4" ]]; then
-            mkfs.$rootfs /dev/$root
+            # Remove existing fs signatures (prevent "are you sure?" dialog)
+            wipefs -a /dev/$root &>> $logfile
+            mkfs.$rootfs /dev/$root &>> $logfile
+            formrv=$?
         else
-            mkfs.$rootfs -f /dev/$root
+            mkfs.$rootfs -f /dev/$root &>> $logfile
+            formrv=$?
+        fi
+        if [[ $formrv != 0 ]]; then
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 5..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 4..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 3..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 2..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 1..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "" "Formatting root partition (retry 1/2)"
+            wipefs -a /dev/$root &>> $logfile
+            mkfs.$rootfs /dev/$root &>> $logfile
+            if [[ $? != 0 ]]; then
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 10..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 9..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 8..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 7..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 6..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 5..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 4..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 3..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 2..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 1..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "" "Formatting root partition (retry 2/2)"
+                blkdiscard /dev/$root &>> $logfile
+                mkfs.$rootfs /dev/$root &>> $logfile
+                if [[ $? != 0 ]]; then
+                    tput cuu 1
+                    echolr "\e[36m" "Formatting disk..." "\e[31m" "Failed to format root partition"
+                    exit 1
+                fi
+            fi
         fi
         # Mount root partition to /mnt
-        mount /dev/$root /mnt -v
+        mount /dev/$root /mnt -v &>> $logfile
+        if [[ $? != 0 ]]; then
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 5..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 4..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 3..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 2..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 1..."
+            sleep 1
+            mount /dev/$root /mnt -v &>> $logfile
+            if [[ $? != 0 ]]; then
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[31m" "Failed to mount root partition"
+                exit 1
+            fi
+        fi
         ;;
     1)
         # Format and encrypt root partition
-        printf "%s" "$cryptpass" | cryptsetup -v --batch-mode luksFormat /dev/$root -
-        printf "%s" "$cryptpass" | cryptsetup -v open /dev/$root root -
-        mkfs.$rootfs /dev/mapper/root
+        echolr "\e[36m" "Formatting disk..." "" "Setting up LUKS on root partition"
+        printf "%s" "$cryptpass" | cryptsetup -v --batch-mode luksFormat /dev/$root - &>> $logfile
+        tput cuu 1
+        echolr "\e[36m" "Formatting disk..." "" "Mounting LUKS volume"
+        printf "%s" "$cryptpass" | cryptsetup -v open /dev/$root root - &>> $logfile
+        tput cuu 1
+        echolr "\e[36m" "Formatting disk..." "" "Formatting root partition"
+        mkfs.$rootfs /dev/mapper/root &>> $logfile
+        if [[ $? != 0 ]]; then
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 5..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 4..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 3..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 2..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 1..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "" "Formatting root partition (retry 1/2)"
+            wipefs -a /dev/mapper/root &>> $logfile
+            mkfs.$rootfs /dev/mapper/root &>> $logfile
+            if [[ $? != 0 ]]; then
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 10..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 9..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 8..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 7..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 6..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 5..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 4..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 3..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 2..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format root partition! Retrying in 1..."
+                sleep 1
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "" "Formatting root partition (retry 2/2)"
+                blkdiscard /dev/mapper/root &>> $logfile
+                mkfs.$rootfs /dev/mapper/root &>> $logfile
+                if [[ $? != 0 ]]; then
+                    tput cuu 1
+                    echolr "\e[36m" "Formatting disk..." "\e[31m" "Failed to format root partition"
+                    exit 1
+                fi
+            fi
+        fi
         # Mount root partition to /mnt
-        mount /dev/mapper/root /mnt -v
+        mount /dev/mapper/root /mnt -v &>> $logfile
+        if [[ $? != 0 ]]; then
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 5..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 4..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 3..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 2..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount root partition! Retrying in 1..."
+            sleep 1
+            mount /dev/mapper/root /mnt -v &>> $logfile
+            if [[ $? != 0 ]]; then
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[31m" "Failed to mount root partition"
+                exit 1
+            fi
+        fi
         ;;
 esac
 if [[ $formboot == 1 ]]; then
     # Format ESP
-    mkfs.fat -F32 /dev/$boot -v
+    tput cuu 1
+    echolr "\e[36m" "Formatting disk..." "" "Formatting boot partition"
+    mkfs.fat -F32 /dev/$boot -v &>> $logfile
+    if [[ $? != 0 ]]; then
+        tput cuu 1
+        echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 5..."
+        sleep 1
+        tput cuu 1
+        echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 4..."
+        sleep 1
+        tput cuu 1
+        echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 3..."
+        sleep 1
+        tput cuu 1
+        echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 2..."
+        sleep 1
+        tput cuu 1
+        echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 1..."
+        sleep 1
+        tput cuu 1
+        echolr "\e[36m" "Formatting disk..." "" "Formatting boot partition (retry 1/2)"
+        wipefs -a /dev/$boot &>> $logfile
+        mkfs.fat -F32 /dev/$boot -v &>> $logfile
+        if [[ $? != 0 ]]; then
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 10..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 9..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 8..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 7..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 6..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 5..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 4..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 3..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 2..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to format boot partition! Retrying in 1..."
+            sleep 1
+            tput cuu 1
+            echolr "\e[36m" "Formatting disk..." "" "Formatting boot partition (retry 2/2)"
+            blkdiscard /dev/$boot &>> $logfile
+            mkfs.fat -F32 /dev/$boot -v &>> $logfile
+            if [[ $? != 0 ]]; then
+                tput cuu 1
+                echolr "\e[36m" "Formatting disk..." "\e[31m" "Failed to format boot partition"
+                exit 1
+            fi
+        fi
+    fi
 fi
 # Mount ESP to /mnt/boot
-mount --mkdir /dev/$boot /mnt/boot -v
+mount --mkdir /dev/$boot /mnt/boot -v &>> $logfile
+if [[ $? != 0 ]]; then
+    tput cuu 1
+    echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount boot partition! Retrying in 5..."
+    sleep 1
+    tput cuu 1
+    echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount boot partition! Retrying in 4..."
+    sleep 1
+    tput cuu 1
+    echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount boot partition! Retrying in 3..."
+    sleep 1
+    tput cuu 1
+    echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount boot partition! Retrying in 2..."
+    sleep 1
+    tput cuu 1
+    echolr "\e[36m" "Formatting disk..." "\e[33m" "Failed to mount boot partition! Retrying in 1..."
+    sleep 1
+    mount --mkdir /dev/$boot /mnt/boot -v &>> $logfile
+    if [[ $? != 0 ]]; then
+        tput cuu 1
+        echolr "\e[36m" "Formatting disk..." "\e[31m" "Failed to mount boot partition"
+        exit 1
+    fi
+fi
 if [[ $swapno != 0 ]]; then
     # Format and activate swap partition
-    mkswap /dev/$swap --verbose
-    swapon /dev/$swap -v
+    tput cuu 1
+    echolr "\e[36m" "Formatting disk..." "" "Formatting swap partition"
+    mkswap /dev/$swap --verbose &>> $logfile
+    tput cuu 1
+    echolr "\e[36m" "Formatting disk..." "" "Activating swap"
+    swapon /dev/$swap -v &>> $logfile
 fi
+tput cuu 1
+echolr "\e[36m" "Formatting disk..." "\e[32m" "Done"
 # Install packages
-pacstrap -K /mnt $pkglist
+echolr "\e[36m" "Installing the base system..." "" "Creating install root"
+pacstrap -K /mnt $pkglist 2>&1 | while IFS= read -r line; do
+    echo "$line" >> $logfile
+    if [[ "$line" == *"downloading..."* ]]; then
+        tput cuu 1
+        echolr "\e[36m" "Installing the base system..." "" "$line"
+    fi
+    if [[ "$line" == *"installing"*"..."* ]]; then
+        tput cuu 1
+        echolr "\e[36m" "Installing the base system..." "" "$line"
+    fi
+    if [[ "$line" == *"("*"/"*")"* ]]; then
+        tput cuu 1
+        echolr "\e[36m" "Installing the base system..." "" "$line"
+    fi
+    if [[ "$line" == *"==>"* ]]; then
+        tput cuu 1
+        echolr "\e[36m" "Installing the base system..." "" "$line"
+    fi
+done
+if [[ $? != 0 ]]; then
+    tput cuu 1
+    echolr "\e[36m" "Installing the base system..." "\e[31m" "Failed"
+    exit 1
+fi
+tput cuu 1
+echolr "\e[36m" "Installing the base system..." "\e[32m" "Done"
+echolr "\e[36m" "Configuring system options..." "" "Configuring regional settings"
 # Configure filesystem mount points
 genfstab -U /mnt >> /mnt/etc/fstab
 # Set language and keyboard layout
@@ -1581,13 +2348,15 @@ echo "LANG=${locale}.UTF-8" > /mnt/etc/locale.conf
 echo "KEYMAP=${keys}" > /mnt/etc/vconsole.conf
 # Set hostname
 echo $hname > /mnt/etc/hostname
+tput cuu 1
+echolr "\e[36m" "Configuring system options..." "" "Configuring boot files"
 if [[ $uefiboot == 1 ]]; then
     # Create EFI boot point
-    cp -v /mnt/usr/share/limine/BOOTX64.EFI /mnt/boot/
+    cp -v /mnt/usr/share/limine/BOOTX64.EFI /mnt/boot/ &>> $logfile
 fi
 if [[ $biosboot == 1 ]]; then
     # Create BIOS boot point
-    cp -v /mnt/usr/share/limine/limine-bios.sys /mnt/boot/
+    cp -v /mnt/usr/share/limine/limine-bios.sys /mnt/boot/ &>> $logfile
 fi
 # Get root partition UUID
 uuid=$(blkid -s UUID -o value /dev/$root)
@@ -1607,7 +2376,7 @@ case $bootmenu in
         echo "timeout: 0" >> /mnt/boot/limine.conf
         ;;
     1)
-        echo "timeout: 10" >> /mnt/boot/limine.conf
+        echo "timeout: 10" >> /mnt/bootlimine.conf
         ;;
 esac
 echo "" >> /mnt/boot/limine.conf
@@ -1640,6 +2409,8 @@ if [[ $kernel != "linux" ]]; then
 fi
 touch /mnt/etc/default/limine
 echo "ESP_PATH=/boot" >> /mnt/etc/default/limine
+tput cuu 1
+echolr "\e[36m" "Configuring system options..." "" "Configuring package manager"
 # Edit pacman configuration
 sed -i "s/#Color/Color/" /mnt/etc/pacman.conf
 sed -i "s/ParallelDownloads = 5/ParallelDownloads = 1/" /mnt/etc/pacman.conf
@@ -1647,7 +2418,8 @@ sed -i "s/#NoProgressBar/ILoveCandy/" /mnt/etc/pacman.conf
 sed -i '/\[multilib\]/,/Include/ s/^#//' /mnt/etc/pacman.conf
 # Edit sudo configuration
 sed -i 's/^# \(%wheel ALL=(ALL:ALL) NOPASSWD: ALL\)/\1/' /mnt/etc/sudoers
-
+tput cuu 1
+echolr "\e[36m" "Configuring system options..." "" "Configuring user settings"
 cp ./* /mnt
 if [[ $rootpass == "" ]]; then
     # Disable root account
@@ -1657,13 +2429,21 @@ else
     arch-chroot /mnt chpasswd <<< "root:$rootpass"
 fi
 # Add user
-arch-chroot /mnt useradd -m -G wheel $uname
+arch-chroot /mnt useradd -m -G wheel $uname &>> $logfile
 # Set full name
-arch-chroot /mnt chfn -f "$fullname" $uname
+arch-chroot /mnt chfn -f "$fullname" $uname &>> $logfile
 # Set password
 arch-chroot /mnt chpasswd <<< "$uname:$pass"
+tput cuu 1
+echolr "\e[36m" "Configuring system options..." "\e[32m" "Done"
 # Run child script within chroot
 arch-chroot /mnt bash ./jdai-efi-2.sh
+if [[ $? != 0 ]]; then
+    exit 1
+fi
+
+touch /mnt/tmp/jdae.log
+cat /mnt/tmp/jdae.log >> $logfile
 
 # Write support document
 if [[ -d /mnt/home/${uname}/Desktop ]]; then
@@ -1779,12 +2559,16 @@ EOF
 sed -i 's/^\(%wheel ALL=(ALL:ALL) NOPASSWD: ALL\)/# \1/' /mnt/etc/sudoers
 sed -i 's/^# \(%wheel ALL=(ALL:ALL) ALL\)/\1/' /mnt/etc/sudoers
 
+echolr "\e[36m" "Cleaning up..." "" "Removing temporary files"
 # Clean up temporary files
-rm -v /mnt/home/${uname}/*.sh
-rm -v /mnt/*.sh
-rm -rvf /mnt/home/${uname}/.cache/yay/*
-rm -rvf /mnt/var/cache/pacman/pkg/*
-rm -rvf /mnt/tmp/*
+rm -v /mnt/home/${uname}/*.sh &>> $logfile
+rm -v /mnt/*.sh &>> $logfile
+rm -rvf /mnt/home/${uname}/.cache/yay/* &>> $logfile
+rm -rvf /mnt/var/cache/pacman/pkg/* &>> $logfile
+rm -rvf /mnt/tmp/* &>> $logfile
+tput cuu 1
+echolr "\e[36m" "Cleaning up..." "\e[32m" "Done"
+sleep 1
 
 loop=1
 while [[ $loop == 1 ]]; do
@@ -1810,11 +2594,9 @@ while [[ $loop == 1 ]]; do
             loop=0
             ;;
         "Clean up and exit")
-            set +e
             umount -Rv /mnt
             swapoff -av
             cryptsetup close -v /dev/mapper/root
-            set -e
             clear
             loop=0
             ;;

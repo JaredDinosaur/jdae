@@ -1,8 +1,12 @@
 #!/bin/bash
 verbose=0
-while getopts "v" flag; do
+cleanup=1
+while getopts "vk" flag; do
     if [[ $flag == "v" ]]; then
         verbose=1
+    fi
+    if [[ $flag == "k" ]]; then
+        cleanup=0
     fi
 done
 set -e
@@ -59,51 +63,21 @@ sed -i "s/menuentry \"Arch Linux install medium with speakup screen reader (%ARC
 
 install -Dm755 ../../jdae.sh airootfs/usr/local/bin/jdae.sh
 cat > airootfs/root/.zlogin << "EOF"
-/bin/bash exit.sh
+bash exit.sh
 EOF
 
 cat > airootfs/root/exit.sh << "EOF"
+chmod +x /usr/local/bin/*
 if [[ $(tty) == "/dev/tty1" ]]; then
-    /bin/bash /usr/local/bin/jdae.sh
-    case $? in
-        0)
-            echo ""
-            echo ""
-            echo ""
-            echo "The installer has exited."
-            echo "If you chose clean up and exit, press Ctrl+D to reopen the installer."
-            echo "Otherwise, the following commands must be run beforehand before reopening:"
-            echo "umount -Rv /mnt"
-            echo "swapoff -av"
-            echo "cryptsetup close -v /dev/mapper/root"
-            echo ""
-            ;;
-        *)
-            echo ""
-            echo ""
-            echo ""
-            echo "The installer has exited."
-            echo "To start another installation, run the following commands:"
-            echo "umount -Rv /mnt"
-            echo "swapoff -av"
-            echo "cryptsetup close -v /dev/mapper/root"
-            echo ""
-            echo "Then press Ctrl+D to reopen the installer."
-            echo ""
-            ;;
-    esac
+    jdae.sh
+    echo ""
+    echo ""
+    echo ""
+    echo "The installer has exited."
+    echo "To start another installation, press Ctrl+D."
+    echo ""
 fi
 EOF
-
-echo -e '\e[34m'"[INFO]" '\e(B\e[m'"Cleaning up..."
-case $verbose in
-    0)
-        sudo rm -rf work out
-        ;;
-    1)
-        sudo rm -rvf work out
-        ;;
-esac
 cd ..
 echo -e '\e[34m'"[INFO]" '\e(B\e[m'"Building image (should take 20-30 minutes)..."
 case $verbose in
@@ -114,5 +88,16 @@ case $verbose in
         sudo mkarchiso -v jdae
         ;;
 esac
+echo -e '\e[34m'"[INFO]" '\e(B\e[m'"Cleaning up..."
+if [[ $cleanup == 1 ]]; then
+    case $verbose in
+        0)
+            sudo rm -rf work jdae
+            ;;
+        1)
+            sudo rm -rvf work jdae
+            ;;
+    esac
+fi
 echo ""
 echo -e '\e[32m'"[ OK ]" '\e(B\e[m'"Done."
