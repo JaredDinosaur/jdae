@@ -20,11 +20,8 @@ Storage | ~4GB | 64GB
 > [!NOTE]
 > Issues under Miscallaneous are bugs in other programs which cannot be fixed within the installer.
 ### Installer-related:
-- On some machines, especially VMs, the installer may fail to mount /mnt/boot on its first try. If the installation is run again, it works. The reason for this is currently unknown.
-- ext4 will ask for confirmation when overwriting an existing partition.
-- XFS can rarely fail to format on unencrypted, non-empty disks.
-- The internet connection test may sometimes fail when a connection is present.
 - Selecting "Other" for GPU drivers can install the default drivers instead (usually Nvidia).
+- Some UEFI systems do not detect the boot entry for Arch. This is rare, but requires you to add a boot entry manually.
 ### Miscallaneous:
 - Winboat may not recognise Docker until `sudo systemctl start docker` is run.
 - Packages may fail to install due to a held lock. This can be fixed by running `rm -f ~/.gnupg/public-keys.d/pubring.db.lock`.
