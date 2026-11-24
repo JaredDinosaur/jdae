@@ -21,7 +21,6 @@ Storage | ~4GB | 64GB
 > Issues under Miscallaneous are bugs in other programs which cannot be fixed within the installer.
 ### Installer-related:
 - Selecting "Other" for GPU drivers can install the default drivers instead (usually Nvidia).
-- Some UEFI systems do not detect the boot entry for Arch. This is rare, but requires you to add a boot entry manually.
 ### Miscallaneous:
 - Winboat may not recognise Docker until `sudo systemctl start docker` is run.
 - Packages may fail to install due to a held lock. This can be fixed by running `rm -f ~/.gnupg/public-keys.d/pubring.db.lock`.
