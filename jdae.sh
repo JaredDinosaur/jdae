@@ -1558,7 +1558,9 @@ EOF
 if [[ $uefiboot == 1 ]]; then
     echo "tput cuu 1" >> jdai-efi-2.sh
     echo "echolr \"\e[36m\" \"Setting up bootloader...\" \"\" \"Creating UEFI boot entry\"" >> jdai-efi-2.sh
-    echo "efibootmgr --create --disk /dev/${disk} --part 1 --label \"Arch Linux\" --loader '\\EFI\\BOOTX64.EFI' --unicode &>> $logfile" >> jdai-efi-2.sh
+    echo "mkdir -pv /boot/EFI/BOOT &>> $logfile" >> jdai-efi-2.sh
+    echo "cp -rv /boot/BOOTX64.EFI /boot/EFI/BOOT &>> $logfile" >> jdai-efi-2.sh
+    echo "efibootmgr --create --disk /dev/${disk} --part 1 --label \"Arch Linux\" --loader '\\EFI\\BOOT\\BOOTX64.EFI' --unicode &>> $logfile" >> jdai-efi-2.sh
 fi
 if [[ $biosboot == 1 ]]; then
     echo "tput cuu 1" >> jdai-efi-2.sh
@@ -1595,24 +1597,62 @@ rm -rvf yay-bin &>> ~/jdae.log
 tput cuu 1
 echolr "\e[36m" "Installing yay..." "\e[32m" "Done"
 # Install chaotic-aur
+caurstatus=0
 echolr "\e[36m" "Installing chaotic-aur..." "" "Retrieving key"
-sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com &>> ~/jdae.log
-tput cuu 1
-echolr "\e[36m" "Installing chaotic-aur..." "" "Signing key"
-sudo pacman-key --lsign-key 3056513887B78AEB &>> ~/jdae.log
-tput cuu 1
-echolr "\e[36m" "Installing chaotic-aur..." "" "Installing keyring"
-sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' &>> ~/jdae.log
-tput cuu 1
-echolr "\e[36m" "Installing chaotic-aur..." "" "Installing mirror list"
-sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' &>> ~/jdae.log
-echo "[chaotic-aur]" | sudo tee -a /etc/pacman.conf &>/dev/null
-echo "Include = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf &>/dev/null
-tput cuu 1
-echolr "\e[36m" "Installing chaotic-aur..." "" "Synchronising package databases"
-yay -Syy &>> ~/jdae.log
-tput cuu 1
-echolr "\e[36m" "Installing chaotic-aur..." "\e[32m" "Done"
+sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com &>> ~/jdae.log || {
+        caurstatus=1
+        tput cuu 1
+        echolr "\e[36m" "Installing chaotic-aur..." "\e[31m" "Failed to retrieve key, skipping"
+    }
+EOF
+echo "if [[ \$caurstatus == 0 ]]; then" >> jdai-usr.sh
+cat >> jdai-usr.sh << EOF
+    tput cuu 1
+    echolr "\e[36m" "Installing chaotic-aur..." "" "Signing key"
+    sudo pacman-key --lsign-key 3056513887B78AEB &>> ~/jdae.log || {
+        caurstatus=1
+        tput cuu 1
+        echolr "\e[36m" "Installing chaotic-aur..." "\e[31m" "Failed to sign key, skipping"
+    }
+fi
+EOF
+echo "if [[ \$caurstatus == 0 ]]; then" >> jdai-usr.sh
+cat >> jdai-usr.sh << EOF
+    tput cuu 1
+    echolr "\e[36m" "Installing chaotic-aur..." "" "Installing keyring"
+    sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' &>> ~/jdae.log || {
+        caurstatus=1
+        tput cuu 1
+        echolr "\e[36m" "Installing chaotic-aur..." "\e[31m" "Failed to install keyring, skipping"
+    }
+fi
+EOF
+echo "if [[ \$caurstatus == 0 ]]; then" >> jdai-usr.sh
+cat >> jdai-usr.sh << EOF
+    tput cuu 1
+    echolr "\e[36m" "Installing chaotic-aur..." "" "Installing mirror list"
+    sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' &>> ~/jdae.log || {
+        caurstatus=1
+        tput cuu 1
+        echolr "\e[36m" "Installing chaotic-aur..." "\e[31m" "Failed to install mirror list, skipping"
+    }
+fi
+EOF
+echo "if [[ \$caurstatus == 0 ]]; then" >> jdai-usr.sh
+cat >> jdai-usr.sh << EOF
+    echo "[chaotic-aur]" | sudo tee -a /etc/pacman.conf &>/dev/null
+    echo "Include = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf &>/dev/null
+    tput cuu 1
+    echolr "\e[36m" "Installing chaotic-aur..." "" "Synchronising package databases"
+    yay -Syy &>> ~/jdae.log
+    tput cuu 1
+    echolr "\e[36m" "Installing chaotic-aur..." "\e[32m" "Done"
+else
+    echo -e "\e[33m""WARNING: chaotic-aur has failed to install!"
+    echo -e "\e[33m""This is usually due to a firewall or filter blocking the address."
+    echo -e "\e[33m""Some program installations may fail or take much longer!"
+    echo -e "\e[33m""You can press Ctrl+C to cancel the installation at any time."
+fi
 # Install an alternative kernel if selected
 EOF
 echo "if [[ $kernel != \"linux\" ]]; then" >> jdai-usr.sh
@@ -1632,6 +1672,14 @@ echo "        tput cuu 1" >> jdai-usr.sh
 echo "        echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\" \"\$line\"" >> jdai-usr.sh
 echo "    fi" >> jdai-usr.sh
 echo "    if [[ \"$line\" == *\"==>\"* ]]; then" >> jdai-usr.sh
+echo "        tput cuu 1" >> jdai-usr.sh
+echo "        echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\" \"\$line\"" >> jdai-usr.sh
+echo "    fi" >> jdai-usr.sh
+echo "    if [[ \"$line\" == *\"::\"* ]]; then" >> jdai-usr.sh
+echo "        tput cuu 1" >> jdai-usr.sh
+echo "        echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\" \"\$line\"" >> jdai-usr.sh
+echo "    fi" >> jdai-usr.sh
+echo "    if [[ \"$line\" == *\"checking\"* ]]; then" >> jdai-usr.sh
 echo "        tput cuu 1" >> jdai-usr.sh
 echo "        echolr \"\e[36m\" \"Installing $kernel kernel...\" \"\" \"\$line\"" >> jdai-usr.sh
 echo "    fi" >> jdai-usr.sh
@@ -1696,6 +1744,14 @@ if [[ $extrapkgs != "" ]]; then
     echo "        echolr \"\e[36m\" \"Installing additional packages...\" \"\" \"\$line\"" >> jdai-usr.sh
     echo "    fi" >> jdai-usr.sh
     echo "    if [[ \"$line\" == *\"==>\"* ]]; then" >> jdai-usr.sh
+    echo "        tput cuu 1" >> jdai-usr.sh
+    echo "        echolr \"\e[36m\" \"Installing additional packages...\" \"\" \"\$line\"" >> jdai-usr.sh
+    echo "    fi" >> jdai-usr.sh
+    echo "    if [[ \"$line\" == *\"::\"* ]]; then" >> jdai-usr.sh
+    echo "        tput cuu 1" >> jdai-usr.sh
+    echo "        echolr \"\e[36m\" \"Installing additional packages...\" \"\" \"\$line\"" >> jdai-usr.sh
+    echo "    fi" >> jdai-usr.sh
+    echo "    if [[ \"$line\" == *\"checking\"* ]]; then" >> jdai-usr.sh
     echo "        tput cuu 1" >> jdai-usr.sh
     echo "        echolr \"\e[36m\" \"Installing additional packages...\" \"\" \"\$line\"" >> jdai-usr.sh
     echo "    fi" >> jdai-usr.sh
@@ -2328,6 +2384,14 @@ pacstrap -K /mnt $pkglist 2>&1 | while IFS= read -r line; do
         echolr "\e[36m" "Installing the base system..." "" "$line"
     fi
     if [[ "$line" == *"==>"* ]]; then
+        tput cuu 1
+        echolr "\e[36m" "Installing the base system..." "" "$line"
+    fi
+    if [[ "$line" == *"::"* ]]; then
+        tput cuu 1
+        echolr "\e[36m" "Installing the base system..." "" "$line"
+    fi
+    if [[ "$line" == *"checking"* ]]; then
         tput cuu 1
         echolr "\e[36m" "Installing the base system..." "" "$line"
     fi
