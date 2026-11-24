@@ -24,4 +24,4 @@ Storage | ~4GB | 64GB
 ### Miscallaneous:
 - Winboat may not recognise Docker until `sudo systemctl start docker` is run.
 - Packages may fail to install due to a held lock. This can be fixed by running `rm -f ~/.gnupg/public-keys.d/pubring.db.lock`.
-- Some machines have broken audio when using Pipewire (the default audio engine). To fix this, run `yay -S pulseaudio pulse-native-provider` and answer "y" to any further prompts.
+- Some machines have broken audio when using Pipewire (the default audio engine). To fix this, run `yay -S pulse-native-provider` and answer "y" to any further prompts.
