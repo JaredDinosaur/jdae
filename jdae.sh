@@ -382,27 +382,27 @@ pkgs(){
         choice=$(gum choose "Desktop with Plasma (default)" "Desktop with Hyprland" "Desktop with Xfce" "Desktop with LXQt" "Command line" "Minimal" "Help" --header="Choose a set of packages:")
         case $choice in
             "Desktop with Plasma (default)")
-                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools power-profiles-daemon man-db man-pages sl wget bash-completion fwupd fd parallel"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools power-profiles-daemon man-db man-pages sl wget bash-completion fwupd fd parallel pipewire-alsa sof-firmware pavucontrol"
                 profile="Desktop (Plasma)"
                 loop=0
                 ;;
             "Desktop with Hyprland")
-                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xdg-user-dirs partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xdg-user-dirs partitionmanager plymouth dolphin discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd hyprland kitty wofi waybar hyprpaper git nano kate ark konsole dialog sddm limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman dunst wireplumber noto-fonts pipewire-pulse nerd-fonts sof-firmware sddm-kcm plymouth-kcm systemsettings breeze breeze-cursors breeze-plymouth flatpak-kcm plasma-integration btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel pipewire-alsa sof-firmware"
                 profile="Desktop (Hyprland)"
                 loop=0
                 ;;
             "Desktop with Xfce")
-                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies xdg-user-dirs gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd fd parallel"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies xdg-user-dirs gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd fd parallel pipewire-alsa sof-firmware"
                 profile="Desktop (Xfce)"
                 loop=0
                 ;;
             "Desktop with LXQt")
-                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc vlc-plugins-all iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel"
+                pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc vlc-plugins-all iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel pipewire-alsa sof-firmware"
                 profile="Desktop (LXQt)"
                 loop=0
                 ;;
             "Command line")
-                pkglist="base linux linux-firmware linux-headers screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel"
+                pkglist="base linux linux-firmware linux-headers screenfetch fastfetch tree htop plymouth iwd python git nano dialog limine sudo efibootmgr networkmanager base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel pipewire-alsa sof-firmware"
                 profile="Command line"
                 loop=0
                 ;;
@@ -1048,20 +1048,20 @@ quickins(){
     insmode=$1
     case $insmode in
         "Desktop")
-            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools power-profiles-daemon man-db man-pages sl wget bash-completion fwupd fd parallel"
+            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools power-profiles-daemon man-db man-pages sl wget bash-completion fwupd fd parallel pipewire-alsa sof-firmware"
             profile="Desktop (Plasma)"
             ;;
         "Gaming")
-            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools power-profiles-daemon man-db man-pages sl wget bash-completion fwupd fd parallel"
+            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth dolphin discover packagekit packagekit-qt6 plasma sddm vlc vlc-plugins-all iwd git nano kate ark konsole dialog limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools power-profiles-daemon man-db man-pages sl wget bash-completion fwupd fd parallel pipewire-alsa sof-firmware"
             profile="Desktop (Plasma)"
             ;;
         "Security")
-            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies xdg-user-dirs gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd fd parallel"
+            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop xfce4 xfce4-goodies xdg-user-dirs gparted plymouth thunar gvfs discover packagekit packagekit-qt6 vlc vlc-plugins-all iwd git nano ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools pulseaudio pavucontrol man-db man-pages sl wget bash-completion fwupd fd parallel pipewire-alsa sof-firmware"
             profile="Desktop (Xfce)"
             loop=0
             ;;
         "Lightweight")
-            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc vlc-plugins-all iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel"
+            pkglist="base linux linux-firmware linux-headers filelight flatpak screenfetch fastfetch tree htop btop partitionmanager plymouth thunar gvfs discover packagekit packagekit-qt6 lxqt vlc vlc-plugins-all iwd git nano kate ark dialog lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings limine sudo efibootmgr networkmanager network-manager-applet base-devel blueman btrfs-progs dosfstools e2fsprogs xfsprogs f2fs-tools man-db man-pages sl wget bash-completion fwupd fd parallel pipewire-alsa sof-firmware"
             profile="Desktop (LXQt)"
             loop=0
             ;;
@@ -1546,6 +1546,7 @@ systemctl enable ip6tables iptables iwd NetworkManager-dispatcher NetworkManager
 systemctl enable accounts-daemon &>> /tmp/jdae.log
 systemctl enable udisks2 &>> /tmp/jdae.log
 systemctl enable upower &>> /tmp/jdae.log
+systemctl enable bluetooth &>> /tmp/jdae.log
 systemctl enable sddm &>> /tmp/jdae.log
 systemctl enable lightdm &>> /tmp/jdae.log
 systemctl enable wireplumber &>> /tmp/jdae.log
