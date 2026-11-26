@@ -1417,7 +1417,7 @@ while [[ $menu == 1 ]]; do
     echo "GPU Driver:             $gpuconf"
     echo "Hostname:               $hname"
     if [[ $rootpass == "" ]]; then
-        echo "Root account:               Disabled"
+        echo "Root account:           Disabled"
     else
         echo "Root password:          $rootstar"
     fi
@@ -2441,7 +2441,7 @@ case $bootmenu in
         echo "timeout: 0" >> /mnt/boot/limine.conf
         ;;
     1)
-        echo "timeout: 10" >> /mnt/bootlimine.conf
+        echo "timeout: 10" >> /mnt/boot/limine.conf
         ;;
 esac
 echo "" >> /mnt/boot/limine.conf
