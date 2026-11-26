@@ -1930,6 +1930,7 @@ fi
             echo " Root | 8GB min, 32GB+ recommended"
             echo 
             echo "Press any key to open cfdisk."
+            echo "Remember to write your changes before exiting!"
             read -n 1
             # Open TUI partition manager
             cfdisk /dev/$disk
